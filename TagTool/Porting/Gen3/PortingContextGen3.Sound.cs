@@ -91,7 +91,7 @@ namespace TagTool.Porting.Gen3
 
                 for (int permutationIndex = 0; permutationIndex < permutationCount; permutationIndex++)
                 {
-                    Permutation blamPermutation = BlamSoundGestalt.GetPermutation(pitchRange, permutationIndex, BlamCache.Platform);
+                    Permutation blamPermutation = BlamSoundGestalt.GetPermutation(blamPitchRange, permutationIndex, BlamCache.Platform);
 
                     // Convert the audio audio
                     BlamSound convertedAudio = ConvertAudio(sound, blamTagName, targetFormat, pitchRangeIndex, permutationIndex, blamPermutation);
