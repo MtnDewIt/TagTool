@@ -48,6 +48,16 @@ namespace TagTool.Porting.Gen2
             return newEnvi;
         }
 
+        private BitFlags<SoundFlags> ConvertSoundFlags(BitFlags<SoundFlags> flags)
+        {
+            return flags.ConvertBitwise(CacheContext);
+        }
+
+        public SoundClass ConvertSoundClass(SoundClass soundClass)
+        {
+            return soundClass.Convert();
+        }
+
         public SoundLooping ConvertLoopingSound(CachedTagGen2 gen2Tag, Gen2LoopingSound gen2loop, Stream cacheStream)
         {
             SoundLooping newLoop = new SoundLooping();
@@ -65,7 +75,7 @@ namespace TagTool.Porting.Gen2
             if(sound != null)
             {
                 Sound soundDef = CacheContext.Deserialize<Sound>(cacheStream, sound);
-                newLoop.SoundClass = (SoundLooping.SoundClassValue)soundDef.SoundClass.HaloOnline;
+                newLoop.SoundClass = ConvertSoundClass(soundDef.SoundClass);
             }
             else
             {
@@ -79,8 +89,8 @@ namespace TagTool.Porting.Gen2
         public Sound ConvertSound(CachedTagGen2 gen2Tag, Gen2Sound gen2Sound, Stream gen2Stream, string gen2Name)
         {
             Sound sound = new Sound();
-            sound.SoundClass = gen2Sound.Class;
-            sound.Flags = gen2Sound.Flags.ConvertLexical<Sound.FlagsValue>();
+            sound.Flags = ConvertSoundFlags(gen2Sound.Flags);
+            sound.SoundClass = ConvertSoundClass(gen2Sound.Class);
             sound.SampleRate = gen2Sound.SampleRate;
 
             LoadGen2SoundGestalt(BlamCache, gen2Stream);
@@ -119,28 +129,6 @@ namespace TagTool.Porting.Gen2
             sound.ImportType = ImportType.SingleLayer;
             sound.Unknown12 = 0;
             sound.MaximumPlayTime = gen2Sound.MaximumPlayTime;
-
-            //
-            // convert sound flags
-            //
-
-            if (gen2Sound.Flags.HasFlag(Gen2Sound.Gen2SoundFlags.AlwaysSpatialize))
-                sound.Flags |= Sound.FlagsValue.AlwaysSpatialize;
-
-            if (gen2Sound.Flags.HasFlag(Gen2Sound.Gen2SoundFlags.NeverObstruct))
-                sound.Flags |= Sound.FlagsValue.NeverObstruct;
-
-            if (gen2Sound.Flags.HasFlag(Gen2Sound.Gen2SoundFlags.LinkCountToOwnerUnit))
-                sound.Flags |= Sound.FlagsValue.LinkCountToOwnerUnit;
-
-            if (gen2Sound.Flags.HasFlag(Gen2Sound.Gen2SoundFlags.PitchRangeIsLanguage))
-                sound.Flags |= Sound.FlagsValue.PitchRangeIsLanguage;
-
-            if (gen2Sound.Flags.HasFlag(Gen2Sound.Gen2SoundFlags.DonTUseSoundClassSpeakerFlag))
-                sound.Flags |= Sound.FlagsValue.DontUseSoundClassSpeakerFlag;
-
-            if (gen2Sound.Flags.HasFlag(Gen2Sound.Gen2SoundFlags.DonTUseLipsyncData))
-                sound.Flags |= Sound.FlagsValue.DontUseLipsyncData;
 
             //
             // Convert tags and strings from ugh references (ugh is not ported)
@@ -200,7 +188,7 @@ namespace TagTool.Porting.Gen2
 
                     var permutation = new Permutation();
                     permutation.ImportName = ConvertStringId(ugh.ImportNames[gen2Permutation.Name].Name);
-                    permutation.SkipFraction = gen2Permutation.EncodedSkipFraction / 32767.0f;
+                    permutation.SkipFraction = (gen2Permutation.EncodedSkipFraction / 32767.0f) * 0.5f;
                     permutation.Gain = gen2Permutation.EncodedGain * 127.0f;  // need proper sbyte decoding
                     permutation.PermutationChunks = new List<PermutationChunk>();
                     permutation.RawInfoIndex = (short)i;
@@ -277,7 +265,7 @@ namespace TagTool.Porting.Gen2
             if (playbackParameters.MaximumDistance == 0)
                 playbackParameters.FieldDisableFlags |= PlaybackParameter.FieldDisableFlagsValue.DistanceD;
 
-            playbackParameters.FieldDisableFlags |= PlaybackParameter.FieldDisableFlagsValue.Bit4;
+            playbackParameters.FieldDisableFlags |= PlaybackParameter.FieldDisableFlagsValue.DirectionalAttenuation;
 
             playbackParameters.DistanceParameters = new SoundDistanceParameters()
             {

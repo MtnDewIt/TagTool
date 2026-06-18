@@ -300,47 +300,20 @@ namespace TagTool.BlamFile
             {
                 case CacheVersion.Halo3Retail:
                 case CacheVersion.Halo3Beta:
-                    switch (targetVersion)
-                    {
-                        case CacheVersion.Halo3ODST:
-                        case CacheVersion.HaloOnlineED:
-                        case CacheVersion.HaloOnline106708:
-                            ConvertHalo3ToODSTScenarioChunk();
-                            Version = targetVersion;
-                            if (CacheVersionDetection.IsLittleEndian(targetVersion, platform))
-                                Format = EndianFormat.LittleEndian;
-                            break;
-                        default:
-                            throw new NotImplementedException($"Conversion from Halo 3 to {targetVersion} not supported");
-                    }
+                    ConvertHalo3ToODSTScenarioChunk();
                     break;
-
                 case CacheVersion.Halo3ODST:
-                case CacheVersion.HaloOnlineED:
-                case CacheVersion.HaloOnline106708:
-                    if (CacheVersionDetection.IsLittleEndian(targetVersion, platform))
-                        Format = EndianFormat.LittleEndian;
-                    return;
-
-                case CacheVersion.HaloReach:
-                    switch (targetVersion)
-                    {
-                        case CacheVersion.Halo3ODST:
-                        case CacheVersion.HaloOnlineED:
-                        case CacheVersion.HaloOnline106708:
-                            ConvertReachToODSTScenarioChunk();
-                            Version = targetVersion;
-                            if (CacheVersionDetection.IsLittleEndian(targetVersion, platform))
-                                Format = EndianFormat.LittleEndian;
-                            break;
-                        default:
-                            throw new NotImplementedException($"Conversion from {Version} to {targetVersion} not supported");
-                    }
                     break;
-
+                case CacheVersion.HaloReach:
+                    ConvertReachToODSTScenarioChunk();
+                    break;
                 default:
                     throw new NotImplementedException($"Conversion from {Version} to {targetVersion} not supported");
             }
+
+            Version = targetVersion;
+            if (CacheVersionDetection.IsLittleEndian(targetVersion, platform))
+                Format = EndianFormat.LittleEndian;
         }
 
         /// <summary>

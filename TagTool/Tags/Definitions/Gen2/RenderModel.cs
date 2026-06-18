@@ -243,10 +243,7 @@ namespace TagTool.Tags.Definitions.Gen2
             public RealPoint3d DefaultTranslation;
             public RealQuaternion DefaultRotation;
             public float DefaultScale;
-            public RealVector3d InverseForward;
-            public RealVector3d InverseLeft;
-            public RealVector3d InverseUp;
-            public RealPoint3d InversePosition;
+            public RealMatrix4x3 Inverse;
             public float DistanceFromParent;
         }
 

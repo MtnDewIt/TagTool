@@ -51,7 +51,7 @@ namespace TagTool.Audio
         {
             var newData = new byte[data.Length / 2];
             var input = MemoryMarshal.Cast<byte, float>(data);
-            var output = MemoryMarshal.Cast<byte, short>(newData);
+            var output = MemoryMarshal.Cast<byte, short>(newData.AsSpan());
 
             for (int i = 0; i < input.Length; i++)
             {

@@ -42,7 +42,7 @@ namespace TagTool.Scripting.CSharp
             _state = null;
         }
 
-        public void ExecuteScriptFile(ScriptEvaluationContext context, string filePath, IReadOnlyList<string> args)
+        public object ExecuteScriptFile(ScriptEvaluationContext context, string filePath, IReadOnlyList<string> args)
         {
             var scriptFile = new FileInfo(filePath);
             if (!scriptFile.Exists)
@@ -52,12 +52,12 @@ namespace TagTool.Scripting.CSharp
             context.ScriptFile = scriptFile.FullName;
 
             string input = File.ReadAllText(scriptFile.FullName);
-            EvaluateScript(context, input, inline: false, isolate: true, sourceDirectory: scriptFile.Directory);
+            return EvaluateScript(context, input, inline: false, isolate: true, sourceDirectory: scriptFile.Directory);
         }
 
         public object EvaluateScript(ScriptEvaluationContext context, string input, bool inline = false, bool isolate = false, DirectoryInfo sourceDirectory = null)
         {
-            sourceDirectory ??= new DirectoryInfo(Program.TagToolDirectory);
+            sourceDirectory ??= new DirectoryInfo(DirectoryPaths.Base);
             var preprocessResult = new ScriptPreprocessor().PreprocessScript(input);
             var references = GetScriptReferences(preprocessResult.Imports, sourceDirectory);
 

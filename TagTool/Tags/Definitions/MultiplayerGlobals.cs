@@ -29,11 +29,11 @@ namespace TagTool.Tags.Definitions
             [TagField(ValidTags = new[] { "unic" })]
             public CachedTag TeamNameStrings;
 
-            [TagField(MaxVersion = CacheVersion.HaloOnlineED)]
+            [TagField(MaxVersion = CacheVersion.HaloOnlineED_END)]
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public List<MultiplayerColor> TeamColors;
 
-            [TagField(MaxVersion = CacheVersion.HaloOnlineED)]
+            [TagField(MaxVersion = CacheVersion.HaloOnlineED_END)]
             public List<CustomizedModelCharacter> CustomizableCharacters;
 
             [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline235640)]
@@ -300,7 +300,7 @@ namespace TagTool.Tags.Definitions
                     public StringId InAnimation;
                     public StringId LoopAnimation;
                     public StringId OutAnimation;
-                    [TagField(MaxVersion = CacheVersion.HaloOnlineED)]
+                    [TagField(MaxVersion = CacheVersion.HaloOnlineED_END)]
                     public float Offset;
                     [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                     public WeaponLoadout WeaponLoadout;

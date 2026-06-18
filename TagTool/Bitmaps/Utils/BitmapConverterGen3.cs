@@ -1,7 +1,6 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using TagTool.Cache;
-using TagTool.Extensions;
+using TagTool.Common.Logging;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Bitmaps.Utils
@@ -18,6 +17,7 @@ namespace TagTool.Bitmaps.Utils
         public bool HqNormalMapCompression { get; set; }
         public bool ForceDxt5nm { get; set; }
         public BitmapConverterMode Mode { get; set; }
+        public bool AllowOptimization { get; set; } = true;
 
         public BitmapConverterGen3(GameCache cache)
         {
@@ -31,7 +31,15 @@ namespace TagTool.Bitmaps.Utils
                 return null;
 
             Bitmap.Image image = bitmap.Images[imageIndex];
-            BitmapFormat destFormat = GestDestinationFormat(image.Format, tagName, bitmap, imageIndex);
+
+            PipelineBuilder pipeline = CreateConverterPipeline(tagName, bitmap, imageIndex);
+            pipeline.ApplyConstraints(image.Width, image.Height);
+
+            if (AllowOptimization)
+                pipeline.ApplyOptimization(extractor, image.Type, image.Width, image.Height, BitmapUtils.GetBitmapUsageFormat(bitmap));
+
+            ConverterDelegate converter = pipeline.Build();
+            BitmapFormat destFormat = pipeline.DestFormat;
 
             int mipCount = image.MipmapCount + 1;
             int layerCount = image.Type == BitmapType.CubeMap ? 6 : image.Depth;
@@ -56,7 +64,7 @@ namespace TagTool.Bitmaps.Utils
                 }
 
                 byte[] surface = extractor.ExtractSurface(sourceLayerIndex, mipLevel, out int levelWidth, out int levelHeight);
-                surface = ConvertBitmapData(surface, levelWidth, levelHeight, image.Format, destFormat, bitmap, imageIndex, tagName);
+                surface = converter?.Invoke(surface, levelWidth, levelHeight);
                 result.Write(surface);
             }
 
@@ -80,35 +88,57 @@ namespace TagTool.Bitmaps.Utils
             return resultBitmap;
         }
 
-        private BitmapFormat GestDestinationFormat(BitmapFormat format, string tagName, Bitmap bitmap, int imageIndex)
+        private PipelineBuilder CreateConverterPipeline(string tagName, Bitmap bitmap, int imageIndex)
         {
-            if (Mode == BitmapConverterMode.DiffuseToNormal)
-                return GetNormalMapFormat(format);
+            Bitmap.Image image = bitmap.Images[imageIndex];
+            BitmapFormat format = image.Format;
 
-            // array textures will be converted to texture3d which does not support v8u8
-            if (bitmap.Usage == Bitmap.BitmapUsageGlobalEnum.WaterArray)
-                return BitmapFormat.A8R8G8B8;
+            BitmapFormat destFormat = (BitmapUtils.IsNormalMap(bitmap, imageIndex) || Mode == BitmapConverterMode.DiffuseToNormal)
+                ? GetNormalMapFormat(format)
+                : BitmapUtils.GetEquivalentBitmapFormat(format);
 
-            if (BitmapUtils.IsNormalMap(bitmap, imageIndex))
+            var pipeline = new PipelineBuilder(tagName, image.Format, destFormat, Cache.Version, Cache.Platform)
             {
-                format = GetNormalMapFormat(format);
+                CompressionQuality = HqNormalMapCompression ? CompressionQuality.High : CompressionQuality.Default
+            };
 
-                // non-pow2 dxn is not supported in d3d9
-                if (format == BitmapFormat.Dxn && !BitmapUtils.IsPowerOfTwo(bitmap.Images[imageIndex].Width, bitmap.Images[imageIndex].Height))
-                    return BitmapFormat.Dxt1;
-
-                return format;
+            // Direct conversions
+            if (format == destFormat)
+            {
+                switch (format)
+                {
+                    case BitmapFormat.A2R10G10B10 when Cache.Platform == CachePlatform.MCC:
+                        pipeline.Transform(BitmapConversionHelpers.Convert_RGB10A2_To_A2RGB10);
+                        break;
+                    case BitmapFormat.Dxn when Cache.Platform == CachePlatform.MCC:
+                        pipeline.Transform(BitmapConversionHelpers.Convert_BC5SNorm_To_ATI2);
+                        break;
+                    case BitmapFormat.Dxn when Cache.Platform == CachePlatform.Original:
+                        pipeline.Transform(BitmapDecoder.SwapXYDxn);
+                        break;
+                }
+                pipeline.Platform = CachePlatform.Original;
+                pipeline.Version = CacheVersion.HaloOnlineED;
             }
 
-            return BitmapUtils.GetEquivalentBitmapFormat(format);
-        }
+            // array textures will be converted to texture3d which doesn't support v8u8
+            if (bitmap.Usage == Bitmap.BitmapUsageGlobalEnum.WaterArray)
+            {
+                pipeline.DestFormat = BitmapFormat.A8R8G8B8;
+            }
 
-        private CompressionQuality GetCompressionQuality(BitmapFormat destFormat)
-        {
-            if (destFormat == BitmapFormat.Dxt5nm && HqNormalMapCompression)
-                return CompressionQuality.High;
+            if ((format == BitmapFormat.Dxt5 && tagName == @"objects\vehicles\wraith\bitmaps\wraith_bump") || Mode == BitmapConverterMode.DiffuseToNormal)
+            {
+                pipeline.TransformPixels((data, _, _) => BitmapConversionHelpers.Diffuse_To_Normal(data, image.Curve));
+            }
 
-            return CompressionQuality.Default;
+            // cubemap compatibility - this is required for h3 shaders to look correct when using reach dynamic cubemaps
+            if (Cache.Version >= CacheVersion.HaloReach && image.ExponentBias == 2)
+            {
+                pipeline.TransformPixels((data, _, _) => BitmapConversionHelpers.ApplyExponentBias(data, image.ExponentBias));
+            }
+
+            return pipeline;
         }
 
         private BitmapFormat GetNormalMapFormat(BitmapFormat format)
@@ -120,113 +150,6 @@ namespace TagTool.Bitmaps.Utils
                 return format;
 
             return HqNormalMapCompression ? BitmapFormat.Dxn : BitmapFormat.Dxt1;
-        }
-
-        private byte[] ConvertBitmapData(byte[] data, int width, int height, BitmapFormat format, BitmapFormat destFormat, Bitmap bitmap, int imageIndex, string tagName)
-        {
-            CompressionQuality quality = GetCompressionQuality(destFormat);
-
-            if (Cache.Platform == CachePlatform.MCC && format == destFormat)
-                return ConvertDXGIFormats(data, width, height, format);
-
-            // DXN -> ATI2
-            if (Cache.Platform == CachePlatform.Original && format == BitmapFormat.Dxn && destFormat == BitmapFormat.Dxn)
-                return BitmapDecoder.SwapXYDxn(data, width, height);
-
-            // fix dxt5 bumpmaps (h3 wraith bump)
-            if ((format == BitmapFormat.Dxt5 && tagName == @"objects\vehicles\wraith\bitmaps\wraith_bump") || Mode == BitmapConverterMode.DiffuseToNormal)
-            {
-                data = BitmapDecoder.DecodeBitmap(data, format, width, height, Cache.Version, Cache.Platform);
-                
-                var curve = BitmapCurves.GetCurve(bitmap.Images[imageIndex].Curve);
-                
-                for (int i = 0; i < data.Length; i += 4)
-                {
-                    float x = curve.ToLinear(data[i + 2] / 255f);
-                    float y = curve.ToLinear(data[i + 1] / 255f);
-                    float z = BitmapUtils.CalculateNormalZ(x, y);
-
-                    data[i + 0] = (byte)((z + 1f) * 127.5f + 0.5f);
-                    data[i + 1] = (byte)((y + 1f) * 127.5f + 0.5f);
-                    data[i + 2] = (byte)((x + 1f) * 127.5f + 0.5f);
-                    data[i + 3] = 255;
-                }
-
-                return BitmapDecoder.EncodeBitmap(data, destFormat, width, height, quality);
-            }
-
-            // cubemap compatibility - this is required for h3 shaders to look correct when using reach dynamic cubemaps
-            if (Cache.Version >= CacheVersion.HaloReach && bitmap.Images[imageIndex].ExponentBias == 2)
-            {
-                var rawData = BitmapDecoder.DecodeBitmap(data, format, width, height, Cache.Version, Cache.Platform);
-                const float oneDiv255 = 1.0f / 255.0f;
-                float expBias = (float)Math.Pow(2.0f, bitmap.Images[imageIndex].ExponentBias); // 4.0f
-                for (int i = 0; i < data.Length; i += 4)
-                {
-                    var vector = VectorExtensions.InitializeVector(new float[] { rawData[i], rawData[i + 1], rawData[i + 2], rawData[i + 3] });
-
-                    vector *= oneDiv255; // 0-1 range
-                                         // need more math here. not sure if it can be prebaked. this should do for now.
-                    vector *= vector;
-                    vector *= 255.0f; // 0-255 range
-
-                    rawData[i + 0] = (byte)vector[0];
-                    rawData[i + 1] = (byte)vector[1];
-                    rawData[i + 2] = (byte)vector[2];
-                    //rawData[i + 3] = (byte)(biasedAlpha * 255.0f); // no need to touch alpha.
-                }
-                return BitmapDecoder.EncodeBitmap(rawData, destFormat, width, height, quality);
-            }
-
-            if (format == destFormat)
-                return data;
-
-            data = BitmapDecoder.DecodeBitmap(data, format, width, height, Cache.Version, Cache.Platform);
-            return BitmapDecoder.EncodeBitmap(data, destFormat, width, height, quality);
-        }
-
-        private static unsafe byte[] ConvertDXGIFormats(byte[] data, int width, int height, BitmapFormat format)
-        {
-            if (format == BitmapFormat.Dxn)
-            {
-                for (int i = 0; i < data.Length; i += 16)
-                {
-                    // signed -> unsigned
-                    data[i + 0] += 128;
-                    data[i + 1] += 128;
-                    data[i + 8] += 128;
-                    data[i + 9] += 128;
-
-                    // swap X/Y
-                    for (int j = 0; j < 8; j++)
-                    {
-                        byte tmp = data[i + j];
-                        data[i + j] = data[i + j + 8];
-                        data[i + j + 8] = tmp;
-                    }
-                }
-                return data;
-            }
-
-            if (format == BitmapFormat.A2R10G10B10)
-            {
-                // convert DXGI_FORMAT_R10G10B10A2_UNORM to A2R10G10B10
-                fixed (byte* ptr = data)
-                {
-                    for (int i = 0; i < width * height; i++)
-                    {
-                        uint* pixel = (uint*)&ptr[i * 4];
-                        uint R = (*pixel & 0x3ff00000) >> 20;
-                        uint G = (*pixel & 0x000ffc00);
-                        uint B = (*pixel & 0x000003ff) << 20;
-                        uint A = (*pixel & 0xC0000000);
-                        *pixel = B | G | R | A;
-                    }
-                }
-                return data;
-            }
-
-            return data;
         }
     }
 }

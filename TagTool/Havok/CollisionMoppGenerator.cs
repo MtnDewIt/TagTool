@@ -42,7 +42,7 @@ namespace TagTool.Havok
 
         private static byte[] GenerateMoppCode(IntermediateFormat input)
         {
-            var tempDir = Directory.CreateDirectory(Path.Combine(Program.TagToolDirectory, "Temp"));
+            var tempDir = Directory.CreateDirectory(DirectoryPaths.Temp);
             var id = Guid.NewGuid().ToString().Replace("_", "").Substring(8);
             var inputFile = new FileInfo(Path.Combine(tempDir.FullName, $"mopp_{id}.input"));
             var outputFile = new FileInfo(Path.Combine(tempDir.FullName, $"mopp_{id}.output"));

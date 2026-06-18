@@ -39,8 +39,8 @@ namespace TagTool.Tags.Definitions
             public StringId Name;
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public byte Type;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public DifficultyFlags Difficulty;
+            [TagField(MinVersion = CacheVersion.HaloReach, EnumType = typeof(byte))]
+            public GameDifficultyFlags Difficulty;
             [TagField(MinVersion = CacheVersion.HaloReach, Flags = Padding, Length = 2)]
             public byte[] ReachPadding;
             [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -113,16 +113,6 @@ namespace TagTool.Tags.Definitions
                 None = 0,
                 DisplaysOnHud = 1 << 0,
                 Bit1 = 1 << 1 // only used for "super_sleuth"
-            }
-
-            [Flags]
-            public enum DifficultyFlags : byte
-            {
-                None = 0,
-                Easy = 1 << 0,
-                Normal = 1 << 1,
-                Heroic = 1 << 2,
-                Legendary = 1 << 3,
             }
 
             [TagStructure(Size = 0x4)]

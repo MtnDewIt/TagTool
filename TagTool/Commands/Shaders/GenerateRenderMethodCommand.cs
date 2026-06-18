@@ -59,8 +59,9 @@ namespace TagTool.Commands.Shaders
 
             // check if tag already exists, or allocate new one
             string rmGroup = ShaderTypeGroups[rmt2Descriptor.Type];
-            if (!Cache.TagCache.TryGetTag($"{args[0]}.{rmGroup}", out var rmTag))
-                rmTag = Cache.TagCache.AllocateTag(Cache.TagCache.TagDefinitions.GetTagGroupFromTag(rmGroup), args[0]);
+            string rmName = args[0].Split('.')[0];
+            if (!Cache.TagCache.TryGetTag($"{rmName}.{rmGroup}", out var rmTag))
+                rmTag = Cache.TagCache.AllocateTag(Cache.TagCache.TagDefinitions.GetTagGroupFromTag(rmGroup), rmName);
 
             string prefix = rmt2Descriptor.IsMs30 ? "ms30\\" : "";
             string rmdfName = prefix + "shaders\\" + rmt2Descriptor.Type;

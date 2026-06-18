@@ -28,7 +28,7 @@ namespace TagTool.Cache.ModPackages
             Package = package;
             Cache = cache;
             ExistingResources = new Dictionary<string, ResourcePage>();
-            ResourceCache = new ResourceCacheHaloOnline(package.PackageVersion, package.PackagePlatform, package.ResourcesStream);
+            ResourceCache = new ResourceCacheHaloOnline(cache.Version, cache.Platform, package.ResourcesStream);
             Serializer = new ResourceSerializer(Cache.Version, Cache.Platform);
             Deserializer = new ResourceDeserializer(Cache.Version, Cache.Platform);
         }

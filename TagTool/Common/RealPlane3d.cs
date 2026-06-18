@@ -140,5 +140,34 @@ namespace TagTool.Common
                 return true;
             }
         }
+
+        public bool ContainsPoint(RealPoint3d point, float tolerance = float.Epsilon)
+        {
+            double difference = (I * point.X) + (J * point.Y) + (K * point.Z) - D;
+            return Math.Abs(difference) <= tolerance;
+        }
+
+        public bool ContainsAllPoints(IList<RealPoint3d> points, float tolerance = float.Epsilon)
+        {
+            foreach (var point in points)
+            {
+                if (!ContainsPoint(point, tolerance))
+                    return false;
+            }
+
+            return true;
+        }
+
+        public IList<RealPoint3d> FindContainedPoints(IList<RealPoint3d> points, float tolerance = float.Epsilon)
+        {
+            IList<RealPoint3d> containedPoints = [];
+            foreach (var point in points)
+            {
+                if (ContainsPoint(point))
+                    containedPoints.Add(point);
+            }
+
+            return containedPoints;
+        }
     }
 }

@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Numerics;
 using System.Text;
 
 namespace System
@@ -154,6 +156,23 @@ namespace System
             for (int i = 0; i < repeats; i++)
                 result += str;
             return result;
+        }
+
+        public static bool TryParseValidIndex(this string str, int? count, out int index)
+        {
+            int safeCount = count ?? 0;
+            if (int.TryParse(str, out index))
+            {
+                return index >= 0 && index < safeCount;
+            }
+            return false;
+        }
+
+        public static bool TryParseNumeric<T>(this string str, out object result) where T : INumber<T>
+        {
+            bool success = T.TryParse(str, CultureInfo.InvariantCulture, out T value);
+            result = value;
+            return success;
         }
     }
 }

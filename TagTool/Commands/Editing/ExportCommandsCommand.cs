@@ -58,7 +58,7 @@ namespace TagTool.Commands.Editing
             return true;
         }
 
-        private void DumpCommands(HashSet<string> strings, List<string> commands, GameCache cache, object data, string fieldName = null)
+        private void DumpCommands(HashSet<string> strings, List<string> commands, GameCache cache, object data, string fieldName = null, TagFieldAttribute attr = null)
         {
             if (Flags.HasFlag(ExportFlags.NoDefault) && IsDefaultValue(data))
                 return;
@@ -68,7 +68,13 @@ namespace TagTool.Commands.Editing
                 case TagStructure tagStruct:
                     {
                         foreach (var field in tagStruct.GetTagFieldEnumerable(cache.Version, cache.Platform))
-                            DumpCommands(strings, commands, cache, field.GetValue(data), fieldName != null ? $"{fieldName}.{field.Name}" : field.Name);
+                        {
+                            if (!field.Attribute.Flags.HasFlag(TagFieldFlags.Padding))
+                            {
+                                var name = fieldName != null ? $"{fieldName}.{field.Name}" : field.Name;
+                                DumpCommands(strings, commands, cache, field.GetValue(data), name, field.Attribute);
+                            }
+                        }
                     }
                     break;
                 case IList collection:
@@ -128,7 +134,9 @@ namespace TagTool.Commands.Editing
                             }
                             else
                             {
-                                commands.Add($"AddBlockElements {fieldName} {collection.Count}");
+                                if (attr is not null && attr.Length == 0)
+                                    commands.Add($"AddBlockElements {fieldName} {collection.Count}");
+
                                 for (int i = 0; i < collection.Count; i++)
                                     DumpCommands(strings, commands, cache, collection[i], $"{fieldName}[{i}]");
                             }
@@ -141,15 +149,19 @@ namespace TagTool.Commands.Editing
                         strings.Add(str);
                         goto default;
                     }
-                default:
-                    //if (data != null && data.ToString().Contains("|"))
-                    if (fieldName.Split('.').Last().Contains("Flags"))
+                case Enum enumValue:
                     {
-                        string flaglist = data.ToString();
-                        flaglist = flaglist.Replace(" ", string.Empty);
-                        commands.Add($"SetField {fieldName} {flaglist}");
+                        TagEnumInfo enumInfo = TagEnum.GetInfo(enumValue.GetType(), cache.Version, cache.Platform);
+                        string value = data.ToString();
+
+                        if (enumInfo.IsFlags)
+                            value = string.IsNullOrWhiteSpace(value) ? "0" : value.Replace(" ", string.Empty);
+
+                        commands.Add($"SetField {fieldName} {value}");
+                        break;
                     }
-                    else if (fieldName.Contains(".TextureConstants[") && fieldName.EndsWith("].Bitmap"))
+                default:
+                    if (fieldName.Contains(".TextureConstants[") && fieldName.EndsWith("].Bitmap"))
                     	break;
                     else
                         commands.Add($"SetField {fieldName} {(FormatValue(data).Equals("\"\"") ? "null" : FormatValue(data))}");
@@ -200,6 +212,12 @@ namespace TagTool.Commands.Editing
                 case DatumHandle datumHandle:
                     return $"{datumHandle.Salt} {datumHandle.Index}";
                 case StringId stringId:
+                    {
+                        if (stringId == StringId.Invalid)
+                            return "INVALID";
+                        if (stringId == StringId.Empty)
+                            return "EMPTY";
+                    }
                     return Cache.StringTable.GetString(stringId);
                 default:
                     return $"{value}";

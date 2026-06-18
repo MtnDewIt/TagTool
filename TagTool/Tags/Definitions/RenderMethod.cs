@@ -106,8 +106,7 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x84, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
         [TagStructure(Size = 0xAC, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
-        [TagStructure(Size = 0x84, Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3Retail)]
-        [TagStructure(Size = 0x8C, Platform = CachePlatform.MCC, Version = CacheVersion.Halo3ODST)]
+        [TagStructure(Size = 0x8C, Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0xB4, Platform = CachePlatform.MCC, MinVersion = CacheVersion.HaloReach)]
         public class RenderMethodPostprocessBlock : TagStructure
         {
@@ -132,12 +131,8 @@ namespace TagTool.Tags.Definitions
             [TagField(Length = 0x1C, MinVersion = CacheVersion.HaloReach)]
             public short[] QueryablePropertiesReach;
 
-            [TagField(Platform = CachePlatform.MCC, MinVersion = CacheVersion.Halo3ODST)]
-            public short AssetDatumSalt;
-            [TagField(Platform = CachePlatform.MCC, MinVersion = CacheVersion.Halo3ODST)]
-            public short AssetDatumIndex;
-            [TagField(Length = 0x4, Flags = Padding, Platform = CachePlatform.MCC, MinVersion = CacheVersion.Halo3ODST)]
-            public byte[] PaddingMCC;
+            [TagField(Platform = CachePlatform.MCC, MinVersion = CacheVersion.Halo3Retail)]
+            public TagResourceReference ConstantBufferResource;
 
             public enum BlendModeValue : uint
             {

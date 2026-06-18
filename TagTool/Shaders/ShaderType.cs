@@ -3,6 +3,7 @@
     public enum ShaderType : byte
     {
         VertexShader,
-        PixelShader
+        PixelShader,
+        ComputeShader
     }
 }

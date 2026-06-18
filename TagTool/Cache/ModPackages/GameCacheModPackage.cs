@@ -46,7 +46,7 @@ namespace TagTool.Cache
         {
             BaseCacheReference = baseCache;
             BaseModPackage = modPackage;
-            Version = CacheVersion.HaloOnlineED;
+            Version = baseCache.Version;
             Platform = CachePlatform.Original;
             Endianness = EndianFormat.LittleEndian;
             Deserializer = new TagDeserializer(Version, Platform);

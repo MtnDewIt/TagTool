@@ -119,9 +119,7 @@ namespace TagTool.Commands.RenderModels
                     NextSiblingNode = -1,
                     DefaultRotation = new RealQuaternion(0, 0, 0, -1),
                     DefaultScale = 1,
-                    InverseForward = new RealVector3d(1, 0, 0),
-                    InverseLeft = new RealVector3d(0, 1, 0),
-                    InverseUp = new RealVector3d(0, 0, 1),
+                    Inverse = RealMatrix4x3.Identity
                 });
 
                 // Build a multipart mesh from the model data,

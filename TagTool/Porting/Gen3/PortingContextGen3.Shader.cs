@@ -30,57 +30,29 @@ namespace TagTool.Porting.Gen3
             return rasg;
         }
 
-        private CachedTag GetDefaultShader(Tag groupTag)
+        private CachedTag GetDefaultShader(CachedTag tag)
         {
             CachedTag shaderTag;
 
-            switch (groupTag.ToString())
+            switch (tag.Group.Tag.ToString())
             {
-                case "beam" when CacheContext.TagCache.TryGetTag(@"objects\weapons\support_high\spartan_laser\fx\firing_3p.beam", out shaderTag):
-                    return shaderTag;
-
-                case "cntl" when CacheContext.TagCache.TryGetTag(@"objects\weapons\pistol\needler\fx\projectile.cntl", out shaderTag):
-                    return shaderTag;
-
-                case "decs" when CacheContext.TagCache.TryGetTag(@"fx\decals\impact_plasma\impact_plasma_medium\hard.decs", out shaderTag):
-                    return shaderTag;
-
-                case "ltvl" when CacheContext.TagCache.TryGetTag(@"objects\weapons\pistol\plasma_pistol\fx\charged\projectile.ltvl", out shaderTag):
-                    return shaderTag;
-
-                case "prt3" when CacheContext.TagCache.TryGetTag(@"fx\particles\energy\sparks\impact_spark_orange.prt3", out shaderTag):
-                    return shaderTag;
-
-                case "rmd " when CacheContext.TagCache.TryGetTag(@"objects\gear\human\military\shaders\human_military_decals.rmd", out shaderTag):
-                    return shaderTag;
-
-                case "rmfl" when CacheContext.TagCache.TryGetTag(@"levels\multi\riverworld\shaders\riverworld_tree_leafa.rmfl", out shaderTag):
-                    return shaderTag;
-
-                case "rmtr" when CacheContext.TagCache.TryGetTag(@"levels\multi\riverworld\shaders\riverworld_ground.rmtr", out shaderTag):
-                    return shaderTag;
-
-                case "rmw " when CacheContext.TagCache.TryGetTag(@"levels\multi\riverworld\shaders\riverworld_water_rough.rmw", out shaderTag):
-                    return shaderTag;
-
-                case "rmhg" when CacheContext.TagCache.TryGetTag(@"objects\multi\shaders\koth_shield.rmhg", out shaderTag):
-                    return shaderTag;
-
-                case "rmbk" when CacheContext.TagCache.TryGetTag(@"levels\dlc\bunkerworld\shaders\z_black.rmsh", out shaderTag):
-                    return shaderTag;
-                case "rmgl" when CacheContext.TagCache.TryGetTag(@"levels\dlc\sidewinder\shaders\side_hall_glass03.rmsh", out shaderTag):
-                    return shaderTag;
-                case "rmrd":
-                case "rmsh":
-                case "rmss":
-                case "rmcs":
-                case "rmzo":
-                case "rmct":
-                    return CacheContext.TagCache.GetTag<Shader>(@"shaders\invalid");
+                case "rmbk":
+                    CacheContext.TagCache.TryGetTag(@"levels\dlc\bunkerworld\shaders\z_black.rmsh", out shaderTag);
+                    break;
+                case "rmgl":
+                    CacheContext.TagCache.TryGetTag(@"levels\dlc\sidewinder\shaders\side_hall_glass03.rmsh", out shaderTag);
+                    break;
+                default:
+                    shaderTag = GetFallbackTag(tag);
+                    break;
             }
 
-            Console.WriteLine($"No default shader found for \"{groupTag.ToString()}\", using \"shaders\\invalid.rmsh\"");
-            return CacheContext.TagCache.GetTag<Shader>(@"shaders\invalid");
+            if (shaderTag is null)
+            {
+                shaderTag = CacheContext.TagCache.GetTag<Shader>(@"shaders\invalid");
+                Log.Warning($"No default shader found for \"{tag.Group.Tag}\", using \"shaders\\invalid.rmsh\"");
+            }
+            return shaderTag;
         }
 
         private RenderMethod ConvertRenderMethod(Stream cacheStream, Stream blamCacheStream, object definition, string blamTagName, RenderMethod renderMethod)

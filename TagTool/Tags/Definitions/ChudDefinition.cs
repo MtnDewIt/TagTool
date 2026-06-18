@@ -650,7 +650,7 @@ namespace TagTool.Tags.Definitions
                 [Flags]
                 public enum UnitInventory : ushort
                 {
-                    None = 1 << 0,
+                    Unarmed = 1 << 0,
                     IsSingleWielding = 1 << 1,
                     IsDualWielding = 1 << 2,
                     HasSupportWeapon = 1 << 3
@@ -1795,7 +1795,7 @@ namespace TagTool.Tags.Definitions
                 [TagField(Version = CacheVersion.Halo3ODST)]
                 public WidgetBitmapFlagsODST FlagsODST;
 
-                [TagField(Version = CacheVersion.HaloOnlineED)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnlineED_END)]
                 public WidgetBitmapFlagsHO Flags;
 
                 [TagField(MinVersion = CacheVersion.HaloReach)]

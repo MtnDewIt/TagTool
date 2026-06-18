@@ -105,21 +105,21 @@ namespace TagTool.Commands.Tags
                 typeSummary[resource.Resource.ResourceType].CompressedSize += compressedSize;
                 typeSummary[resource.Resource.ResourceType].Count++;
 
-                Console.WriteLine(columnFormatString, FormatSize(compressedSize), FormatSize(uncompressedSize), resource.Resource.ResourceType, tag);
+                Console.WriteLine(columnFormatString, FormatUtils.FormatBytes(compressedSize), FormatUtils.FormatBytes(uncompressedSize), resource.Resource.ResourceType, tag);
             }
 
             Console.WriteLine(tableSeparator);
             Console.WriteLine();
-            Console.WriteLine("{0,-20} {1}", "Total Compressed:", FormatSize(totalCompressed));
-            Console.WriteLine("{0,-20} {1}", "Total Uncompressed:", FormatSize(totalUncompressed));
+            Console.WriteLine("{0,-20} {1}", "Total Compressed:", FormatUtils.FormatBytes(totalCompressed));
+            Console.WriteLine("{0,-20} {1}", "Total Uncompressed:", FormatUtils.FormatBytes(totalUncompressed));
             Console.WriteLine();
             Console.WriteLine($"Compressed Totals:");
             foreach (var pair in typeSummary)
-                Console.WriteLine($"\t{pair.Key,-16} {FormatSize(pair.Value.CompressedSize)}");
+                Console.WriteLine($"\t{pair.Key,-16} {FormatUtils.FormatBytes(pair.Value.CompressedSize)}");
             Console.WriteLine();
             Console.WriteLine($"Uncompressed Totals:");
             foreach (var pair in typeSummary)
-                Console.WriteLine($"\t{pair.Key,-16} {FormatSize(pair.Value.UncompressedSize)}");
+                Console.WriteLine($"\t{pair.Key,-16} {FormatUtils.FormatBytes(pair.Value.UncompressedSize)}");
             Console.WriteLine();
             Console.WriteLine($"Counts:");
             foreach (var pair in typeSummary)
@@ -191,20 +191,6 @@ namespace TagTool.Commands.Tags
                     CollectTagResources(cache, stream, tagRef, resourcesList, visitedTags);
                     break;
             }
-        }
-
-        private static string FormatSize(double size)
-        {
-            const double KB = 1024;
-            const double MB = KB * 1024;
-
-            if (size < KB)
-                return $"{size} B";
-
-            if (size < MB)
-                return $"{size / KB:0.0} KB";
-
-            return $"{size / MB:0.0} MB";
         }
 
         private class ResourceTypeSummary

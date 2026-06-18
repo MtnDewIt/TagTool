@@ -8,6 +8,7 @@ using TagTool.Common;
 using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
 using static TagTool.Tags.TagFieldFlags;
+using TagTool.Common.Logging;
 
 namespace TagTool.Commands.Editing
 {
@@ -181,12 +182,20 @@ namespace TagTool.Commands.Editing
                     foreach (var command in commandsToExecute)
                     {
                         var cmd = ContextStack.Context.GetCommand(command[0]);
-                        if (cmd != null)
-                            cmd.Execute(command.Skip(1).ToList());
-                        else
+                        var result = cmd is null
+                            ? new TagToolError(CommandError.CmdNotFound, command[0])
+                            : cmd.Execute([.. command.Skip(1)]);
+
+                        if (result is TagToolError error)
                         {
-                            ContextReturn(previousContext, previousOwner, previousStructure);
-                            return new TagToolError(CommandError.ArgInvalid);
+                            if ((CommandRunner.Current?.SuppressErrors ?? true)
+                                && error.Error != CommandError.CmdNotFound)
+                                Log.Error(error.Message);
+                            else
+                            {
+                                ContextReturn(previousContext, previousOwner, previousStructure);
+                                return result;
+                            }
                         }
                     }
                 }

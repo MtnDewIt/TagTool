@@ -21,14 +21,14 @@ namespace TagTool.Geometry.BspCollisionGeometry
     [TagStructure(Size = 0x70, Align = 16, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
     [TagStructure(Size = 0x80, Align = 16, Version = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
     [TagStructure(Size = 0x80, Align = 16, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
-    [TagStructure(Size = 0x90, Align = 16, Version = CacheVersion.HaloOnlineED, Platform = CachePlatform.Original)]
+    [TagStructure(Size = 0x90, Align = 16, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnlineED_END, Platform = CachePlatform.Original)]
     public class InstancedGeometryPhysics : TagStructure
     {
         public CollisionGeometryShape GeometryShape;
         [TagField(Align = 16)]
         public CMoppBvTreeShape MoppBvTreeShape;
 
-        [TagField(Version = CacheVersion.HaloOnlineED)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnlineED_END)]
         public TagBlock<DecomposedPoopShape> PoopShape;
     }
 

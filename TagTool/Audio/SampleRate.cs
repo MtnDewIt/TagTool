@@ -1,9 +1,11 @@
 ﻿using System;
+using TagTool.Cache;
 using TagTool.Tags;
 
 namespace TagTool.Audio
 {
-    [TagStructure(Size = 0x1)]
+    [TagStructure(Size = 0x2, MaxVersion = CacheVersion.Halo2Beta)]
+    [TagStructure(Size = 0x1, MinVersion = CacheVersion.Halo2Xbox)]
     public class SampleRate : TagStructure
 	{
         public SampleRateValue value;

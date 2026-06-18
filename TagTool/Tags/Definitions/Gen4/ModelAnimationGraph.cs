@@ -30,28 +30,28 @@ namespace TagTool.Tags.Definitions.Gen4
             public int SkeletonChecksum;
             public int SkeletonChecksumLite;
             [TagField(ValidTags = new [] { "frms" })]
-            public CachedTag ImportedEventsAbcdcc;
+            public CachedTag ImportedEvents;
             public List<AnimationUsageBlock> NodeUsage;
-            public List<AnimationNodeMaskBlock> NodeMasksAbcdcc;
-            public List<AnimationFunctionBlock> FunctionsAbcdcc;
-            public List<ModelAnimationVariantBlock> ModelAnimationVariantsAbcdcc;
+            public List<AnimationNodeMaskBlock> NodeMasks;
+            public List<AnimationFunctionBlock> Functions;
+            public List<ModelAnimationVariantBlock> ModelAnimationVariants;
             public List<AnimationGraphNodeBlock> SkeletonNodes;
             // Legacy field - please edit in new frame event tag below
-            public List<AnimationGraphSoundReferenceBlock> SoundReferencesAbcdcc;
+            public List<AnimationGraphSoundReferenceBlock> SoundReferences;
             // Legacy field - please edit in new frame event tag below
-            public List<AnimationGraphEffectReferenceBlock> EffectReferencesAbcdcc;
+            public List<AnimationGraphEffectReferenceBlock> EffectReferences;
             // Legacy field - please edit in NEW blend screens tag below
-            public List<AnimationBlendScreenBlock> BlendScreensAbcdcc;
-            public List<FootTrackingMemberBlock> FootMarkersAbcdcc;
+            public List<AnimationBlendScreenBlock> BlendScreens;
+            public List<FootTrackingMemberBlock> FootMarkers;
             public List<AnimationPoolBlockStruct> Animations;
-            public List<NewAnimationBlendScreenBlockStruct> NewBlendScreensCcbbaa;
-            public List<NewAnimationFunctionOverlayBlock> NewFunctionOverlaysCcaabb;
+            public List<NewAnimationBlendScreenBlockStruct> NewBlendScreens;
+            public List<NewAnimationFunctionOverlayBlock> NewFunctionOverlays;
             public List<OverlayGroupDefinitionBlock> OverlayGroups;
-            public List<AnimationGaitBlock> GaitsAbcdcc;
-            public List<AnimationGaitGroupBlock> GaitGroupsAbcdcc;
-            public List<AnimationIkBlock> IkDataCcbbaa;
-            public List<AnimationIkSet> IkSetsCcbbaa;
-            public List<AnimationIkChainBlock> IkChainsCcbbaa;
+            public List<AnimationGaitBlock> Gaits;
+            public List<AnimationGaitGroupBlock> GaitGroups;
+            public List<AnimationIkBlock> IkData;
+            public List<AnimationIkSet> IkSets;
+            public List<AnimationIkChainBlock> IkChains;
             public List<GCompositetagStruct> Composites;
             public PcaanimationDataStruct PcaData;
             
@@ -426,19 +426,19 @@ namespace TagTool.Tags.Definitions.Gen4
                     public float AverageTranslationMagnitude;
                     public float AveragePivotYaw;
                     // Legacy field - please edit in new frame event tag below
-                    public List<AnimationFrameEventBlockStruct> FrameEventsAbcdcc;
+                    public List<AnimationFrameEventBlockStruct> FrameEvents;
                     // Legacy field - please edit in new frame event tag below
-                    public List<AnimationSoundEventBlock> SoundEventsAbcdcc;
+                    public List<AnimationSoundEventBlock> SoundEvents;
                     // Legacy field - please edit in new frame event tag below
-                    public List<AnimationEffectEventBlock> EffectEventsAbcdcc;
+                    public List<AnimationEffectEventBlock> EffectEvents;
                     // Legacy field - please edit in new frame event tag below
-                    public List<AnimationDialogueEventBlock> DialogueEventsAbcdcc;
+                    public List<AnimationDialogueEventBlock> DialogueEvents;
                     // Legacy field - please edit in new frame event tag below
-                    public List<AnimationScriptEventBlock> ScriptEventsAbcdcc;
-                    public List<ObjectSpaceNodeDataBlock> ObjectSpaceParentNodesAbcdcc;
-                    public List<FootTrackingBlock> FootTrackingAbcdcc;
-                    public List<ObjectSpaceOffsetNodeBlock> ObjectSpaceOffsetNodesAbcdcc;
-                    public List<FikAnchorNodeBlock> ForwardInvertKineticAnchorNodesAbcdcc;
+                    public List<AnimationScriptEventBlock> ScriptEvents;
+                    public List<ObjectSpaceNodeDataBlock> ObjectSpaceParentNodes;
+                    public List<FootTrackingBlock> FootTracking;
+                    public List<ObjectSpaceOffsetNodeBlock> ObjectSpaceOffsetNodes;
+                    public List<FikAnchorNodeBlock> ForwardInvertKineticAnchorNodes;
                     public List<AnimationIkChainEventsStruct> IkChainEvents;
                     public List<AnimationIkChainProxiesStruct> IkChainProxies;
                     public List<AnimationFacialWrinkleEventsStruct> FacialWrinkleEvents;
@@ -718,7 +718,7 @@ namespace TagTool.Tags.Definitions.Gen4
                         public short Foot;
                         [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
                         public byte[] Padding;
-                        public List<FootLockCycleBlock> CyclesAbcdcc;
+                        public List<FootLockCycleBlock> Cycles;
                         
                         [TagStructure(Size = 0x14)]
                         public class FootLockCycleBlock : TagStructure
@@ -1008,7 +1008,7 @@ namespace TagTool.Tags.Definitions.Gen4
             {
                 public StringId Name;
                 public List<BlendScreenItemDefinitionBlock> BlendScreens;
-                public List<FunctionOverlayItemDefinitionBlock> FunctionOverlaysCcbbaa;
+                public List<FunctionOverlayItemDefinitionBlock> FunctionOverlays;
                 
                 [TagStructure(Size = 0x8)]
                 public class BlendScreenItemDefinitionBlock : TagStructure
@@ -1102,7 +1102,7 @@ namespace TagTool.Tags.Definitions.Gen4
             public class AnimationIkSet : TagStructure
             {
                 public StringId Name;
-                public List<AnimationIkSetItem> IkPointsCcbbaa;
+                public List<AnimationIkSetItem> IkPoints;
                 
                 [TagStructure(Size = 0x4)]
                 public class AnimationIkSetItem : TagStructure
@@ -1272,7 +1272,7 @@ namespace TagTool.Tags.Definitions.Gen4
             {
                 public List<PcagroupSettingsBlock> PcaGroups;
                 [TagField(ValidTags = new [] { "pcaa" })]
-                public CachedTag PcaAnimationAbcdcc;
+                public CachedTag PcaAnimation;
                 public int PcaAnimationCount;
                 public int PcaChecksum;
                 
@@ -1288,11 +1288,11 @@ namespace TagTool.Tags.Definitions.Gen4
         [TagStructure(Size = 0x28)]
         public class AnimationGraphContentsStruct : TagStructure
         {
-            public short DefaultGaitGroupCcaabb;
+            public short DefaultGaitGroup;
             [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
             public byte[] Padding;
-            public List<AnimationModeBlock> ModesAabbcc;
-            public List<VehicleSuspensionBlock> VehicleSuspensionCcaabb;
+            public List<AnimationModeBlock> Modes;
+            public List<VehicleSuspensionBlock> VehicleSuspension;
             public List<FunctionOverlayAnimationBlock> FunctionOverlays;
             
             [TagStructure(Size = 0x30)]
@@ -1302,9 +1302,9 @@ namespace TagTool.Tags.Definitions.Gen4
                 public short OverlayGroup;
                 public short IkSet;
                 public AnimationModeFlags Flags;
-                public List<WeaponClassBlockStruct> WeaponClassAabbcc;
-                public List<AnimationIkBlockV1> ModeIkAabbcc;
-                public List<FootTrackingDefaults> FootDefaultsAabbcc;
+                public List<WeaponClassBlockStruct> WeaponClass;
+                public List<AnimationIkBlockV1> ModeIk;
+                public List<FootTrackingDefaults> FootDefaults;
                 
                 [Flags]
                 public enum AnimationModeFlags : uint
@@ -1318,8 +1318,8 @@ namespace TagTool.Tags.Definitions.Gen4
                     public StringId Label;
                     public short OverlayGroup;
                     public short IkSet;
-                    public List<WeaponTypeBlockStruct> WeaponTypeAabbcc;
-                    public List<AnimationIkBlockV1> WeaponIkAabbcc;
+                    public List<WeaponTypeBlockStruct> WeaponType;
+                    public List<AnimationIkBlockV1> WeaponIk;
                     public List<AnimationRangedActionBlock> RangedActions;
                     public List<AnimationSyncActionGroupBlock> SyncActionsGroups;
                     
@@ -1329,7 +1329,7 @@ namespace TagTool.Tags.Definitions.Gen4
                         public StringId Label;
                         public short OverlayGroup;
                         public short IkSet;
-                        public List<AnimationSetBlock> SetsAabbcc;
+                        public List<AnimationSetBlock> Sets;
                         
                         [TagStructure(Size = 0x48)]
                         public class AnimationSetBlock : TagStructure
@@ -1337,13 +1337,13 @@ namespace TagTool.Tags.Definitions.Gen4
                             public StringId Label;
                             public short OverlayGroup;
                             public short IkSet;
-                            public short GaitGroupAabbcc;
+                            public short GaitGroup;
                             [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
                             public byte[] Padding;
-                            public List<AnimationEntryBlock> ActionsAabbcc;
+                            public List<AnimationEntryBlock> Actions;
                             public List<AnimationEntryBlock> OverlayAnimations;
-                            public List<DamageAnimationBlock> DeathAndDamageAabbcc;
-                            public List<AnimationTransitionSourceBlockStruct> TransitionsAabbcc;
+                            public List<DamageAnimationBlock> DeathAndDamage;
+                            public List<AnimationTransitionSourceBlockStruct> Transitions;
                             public List<AnimationVelocityBoundariesBlock> VelocityBoundaries;
                             
                             [TagStructure(Size = 0xC)]

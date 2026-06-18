@@ -349,62 +349,55 @@ namespace TagTool.Commands.Editing
 
                 object found;
 
-                try
+                TagEnumInfo enumInfo = TagEnum.GetInfo(type, cache.Version, cache.Platform);
+
+                if (enumInfo.IsVersioned)
                 {
-                    found = Enum.Parse(type, query, true);
-                }
-                catch
-                {
-                    found = null;
-                }
-
-                var names = Enum.GetNames(type).ToList();
-
-                if (found == null)
-                {
-                    var nameLow = query.ToLower();
-                    var namesLow = names.Select(i => i.ToLower()).ToList();
-
-                    found = namesLow.Find(n => n == nameLow);
-
-                    if (found == null)
-                    {
-                        var nameSnake = query.ToSnakeCase();
-                        var namesSnake = names.Select(i => i.ToSnakeCase()).ToList();
-                        found = namesSnake.Find(n => n == nameSnake);
-
-                        if (found == null)
-                        {
-                            Console.WriteLine("Invalid {0} enum option: {1}", type.Name, args[0]);
-                            Console.WriteLine("");
-
-                            Console.WriteLine("Valid options:");
-                            foreach (var name in Enum.GetNames(type))
-                            {
-                                var fieldName = $"{type.FullName}.{name}".Replace("+", ".");
-                                var documentationNode = EditTagContextFactory.Documentation.SelectSingleNode($"//member[starts-with(@name, 'F:{fieldName}')]");
-
-                                Console.WriteLine("\t{0} {1}", name,
-                                    documentationNode != null ?
-                                        $":: {documentationNode.FirstChild.InnerText.Replace("\r\n", "").TrimStart().TrimEnd()}" :
-                                        "");
-                            }
-                            Console.WriteLine();
-
-                            return false;
-                        }
-                        else
-                        {
-                            found = Enum.Parse(type, names[namesSnake.IndexOf((string)found)]);
-                        }
-                    }
+                    if (VersionedEnum.TryParse(enumInfo, query, out found))
+                        return found;
                     else
-                    {
-                        found = Enum.Parse(type, names[namesLow.IndexOf((string)found)]);
-                    }
+                        return false;
                 }
 
-                output = found;
+                string[] split = query.Split(',');
+
+                if (enumInfo.IsFlags)
+                {
+                    ulong mask = 0;
+                    foreach (var name in split)
+                    {
+                        if (long.TryParse(name, out long value))
+                        {
+                            if (split.Length == 1)
+                                mask = (ulong)value;
+                            else if (value >= 0 && value < 64)
+                                mask |= 1UL << (int)value;
+                            else
+                                return false;
+                        }
+                        else if (Enum.TryParse(type, name, true, out var enumValue))
+                        {
+                            var unsignedValue = Convert.ToUInt64(enumValue);
+                            mask |= unsignedValue;
+                        }
+                        else if (string.Equals(query, "none", StringComparison.OrdinalIgnoreCase))
+                            return Enum.ToObject(type, 0);
+                        else
+                            return false;
+                    }
+
+                    query = mask.ToString();
+                }
+                else if (split.Length > 1)
+                    return false;
+
+                if (Enum.TryParse(type, query, true, out found))
+                {
+                    if (enumInfo.IsFlags || Enum.IsDefined(type, found))
+                        return found;
+                }
+
+                return false;
             }
             else if (type.IsArray)
             {
@@ -447,7 +440,10 @@ namespace TagTool.Commands.Editing
 
                 var blamType = Activator.CreateInstance(type) as IBlamType;
                 if (!blamType.TryParse(cache, args, out blamType, out string error))
+                {
                     Log.Error(error);
+                    return false;
+                }
                 return blamType;
             }
             else if (type == typeof(CachedTag))

@@ -1,510 +1,226 @@
 ﻿using System;
 using TagTool.Cache;
 using TagTool.Tags;
+using static TagTool.Audio.SoundClass;
 
 namespace TagTool.Audio
 {
-    [TagStructure(Size = 0x1)]
-    public class SoundClass : TagStructure
+    [TagEnum(IsVersioned = true)]
+    public enum SoundClass
     {
-        [TagField(MinVersion = CacheVersion.HaloXbox, MaxVersion = CacheVersion.HaloCustomEdition)]
-        public SoundClassHalo Halo;
+        ProjectileImpact,
+        ProjectileDetonation,
+        ProjectileFlyby,
+        ProjectileDetonationLod,
+        WeaponFire,
+        WeaponReady,
+        WeaponReload,
+        WeaponEmpty,
+        WeaponCharge,
+        WeaponOverheat,
+        WeaponIdle,
+        WeaponMelee,
+        WeaponAnimation,
+        ObjectImpacts,
+        ParticleImpacts,
+        [TagEnumMember(Gen = CacheGeneration.First)]
+        SlowParticleImpacts,
+        [TagEnumMember(Gen = CacheGeneration.First)]
+        Unused1Impacts,
+        [TagEnumMember(Gen = CacheGeneration.First)]
+        Unused2Impacts,
+        [TagEnumMember(MinVersion = CacheVersion.Halo2Alpha)]
+        WeaponFireLod,  // Gen1 SlowParticleImpacts
+        [TagEnumMember(MinVersion = CacheVersion.Halo2Alpha, MaxVersion = CacheVersion.HaloOnline700123)]
+        WeaponFireLodFar,
+        [TagEnumMember(MinVersion = CacheVersion.HaloReach)]
+        WaterTransitions,
+        [TagEnumMember(MinVersion = CacheVersion.Halo2Alpha)]
+        LowpassEffects,
+        UnitFootsteps,
+        UnitDialog,
+        UnitAnimation,      // Gen1 Unused
+        UnitUnused,         // Gen1 Unused
+        VehicleCollision,
+        VehicleEngine,
+        VehicleAnimation,
+        VehicleEngineLod,
+        DeviceDoor,
+        [TagEnumMember(Gen = CacheGeneration.First)]
+        DeviceForceField,
+        [TagEnumMember(MinVersion = CacheVersion.Halo2Alpha)]
+        DeviceUnused0,
+        DeviceMachinery,
+        DeviceStationary,
+        [TagEnumMember(Gen = CacheGeneration.First)]
+        DeviceComputers,
+        [TagEnumMember(MinVersion = CacheVersion.Halo2Alpha)]
+        DeviceUnused1,
+        DeviceUnused2,
+        Music,
+        AmbientNature,
+        AmbientMachinery,
+        AmbientStationary,
+        HugeAss,            // Gen1 Unused
+        ObjectLooping,      // Gen1 Unused
+        CinematicMusic,     // Gen1 Unused
+        [TagEnumMember(Gen = CacheGeneration.HaloOnline)]
+        PlayerArmor,
+        [TagEnumMember(MaxVersion = CacheVersion.Halo2Beta)]
+        FirstPersonDamage,
+        [TagEnumMember(MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2PC)]
+        Reflection,
+        [TagEnumMember(MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2PC)]
+        ReflectionLod,
+        [TagEnumMember(MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2PC)]
+        ReflectionLodFar,
+        Unused,
+        [TagEnumMember(MaxVersion = CacheVersion.Halo3ODST)]
+        [TagEnumMember(MinVersion = CacheVersion.HaloReach)]
+        Unused1,
+        [TagEnumMember(MaxVersion = CacheVersion.Halo2PC)]
+        Unused2,
+        [TagEnumMember(MaxVersion = CacheVersion.Halo2Beta)]
+        Unused3,
+        [TagEnumMember(MinVersion = CacheVersion.Halo3Beta)]
+        AmbientFlock,
+        [TagEnumMember(MaxVersion = CacheVersion.Halo2Beta)]
+        ScriptedDialoguePlayer,
+        [TagEnumMember(MinVersion = CacheVersion.Halo3Beta)]
+        NoPad,
+        [TagEnumMember(MinVersion = CacheVersion.Halo3Beta)]
+        NoPadStationary,
+        [TagEnumMember(MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.Halo3Retail)]
+        MissionUnused0,
+        [TagEnumMember(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
+        Arg,
+        [TagEnumMember(MinVersion = CacheVersion.HaloReach)]
+        EquipmentEffect,
+        [TagEnumMember(MaxVersion = CacheVersion.Halo2Beta)]
+        ScriptedEffect,
+        [TagEnumMember(MaxVersion = CacheVersion.Halo2Beta)]
+        ScriptedDialogueOther,
+        [TagEnumMember(MaxVersion = CacheVersion.Halo2Beta)]
+        ScriptedDialogueForceUnspatialized,
+        [TagEnumMember(MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.HaloOnline700123)]
+        CortanaMission,
+        [TagEnumMember(MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2PC)]
+        CortanaCinematic,
+        [TagEnumMember(MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.HaloOnline700123)]
+        CortanaGravemindChannel,
+        [TagEnumMember(MinVersion = CacheVersion.Halo2Xbox)]
+        MissionDialogue,
+        [TagEnumMember(MaxVersion = CacheVersion.Halo2Alpha)]
+        DialogueUnused0,
+        [TagEnumMember(MinVersion = CacheVersion.Halo2Beta)]
+        CinematicDialogue,
+        [TagEnumMember(MaxVersion = CacheVersion.Halo2Beta)]
+        DialogueUnused1,
+        [TagEnumMember(MinVersion = CacheVersion.Halo2Xbox)]
+        ScriptedCinematicFoley,
+        [TagEnumMember(Gen = CacheGeneration.HaloOnline)]
+        Hud,
+        GameEvent,
+        [TagEnumMember(MinVersion = CacheVersion.Halo2Xbox)]
+        Ui,
+        [TagEnumMember(MinVersion = CacheVersion.Halo2Beta)]
+        Test,
+        [TagEnumMember(MinVersion = CacheVersion.Halo2Beta, MaxVersion = CacheVersion.HaloOnline700123)]
+        MultilingualTest,
+        [TagEnumMember(MinVersion = CacheVersion.HaloReach)]
+        MultiplayerDialogue,
+        [TagEnumMember(MinVersion = CacheVersion.Halo3ODST)]
+        AmbientNatureDetails,
+        [TagEnumMember(MinVersion = CacheVersion.Halo3ODST)]
+        AmbientMachineryDetails,
+        [TagEnumMember(MinVersion = CacheVersion.Halo3ODST)]
+        InsideSurroundTail,
+        [TagEnumMember(MinVersion = CacheVersion.Halo3ODST)]
+        OutsideSurroundTail,
+        [TagEnumMember(MinVersion = CacheVersion.Halo3ODST)]
+        VehicleDetonation,
+        [TagEnumMember(MinVersion = CacheVersion.Halo3ODST)]
+        AmbientDetonation,
+        [TagEnumMember(MinVersion = CacheVersion.Halo3ODST)]
+        FirstPersonInside,
+        [TagEnumMember(MinVersion = CacheVersion.Halo3ODST)]
+        FirstPersonOutside,
+        [TagEnumMember(MinVersion = CacheVersion.Halo3ODST)]
+        FirstPersonAnywhere,
+        [TagEnumMember(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
+        UiPda,
+        [TagEnumMember(MinVersion = CacheVersion.HaloReach)]
+        SpaceProjectileDetonation,
+        [TagEnumMember(MinVersion = CacheVersion.HaloReach)]
+        SpaceProjectileFlyby,
+        [TagEnumMember(MinVersion = CacheVersion.HaloReach)]
+        SpaceVehicleEngine,
+        [TagEnumMember(MinVersion = CacheVersion.HaloReach)]
+        SpaceWeaponFire,
+        [TagEnumMember(MinVersion = CacheVersion.HaloReach)]
+        PlayerVoiceTeam,
+        [TagEnumMember(MinVersion = CacheVersion.HaloReach)]
+        PlayerVoiceProxy,
+        [TagEnumMember(MinVersion = CacheVersion.HaloReach)]
+        ProjectileImpactPostpone,
+        [TagEnumMember(MinVersion = CacheVersion.HaloReach)]
+        UnitFootstepPostpone,
+        [TagEnumMember(MinVersion = CacheVersion.HaloReach)]
+        WeaponReadyThirdPerson,
+        [TagEnumMember(MinVersion = CacheVersion.HaloReach)]
+        UiMusic
+    }
 
-        [TagField(MinVersion = CacheVersion.Halo2Alpha, MaxVersion = CacheVersion.Halo2PC)]
-        public SoundClassHalo2 Halo2;
-
-        [TagField(MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.Halo3Retail)]
-        public SoundClassHalo3Retail Halo3Retail;
-
-        [TagField(Version = CacheVersion.Halo3ODST)]
-        public SoundClassHalo3ODST Halo3ODST;
-
-        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-        public SoundClassHaloOnline HaloOnline;
-
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public SoundClassHaloReach HaloReach;
-
-        public enum SoundClassHalo2 : sbyte
+    static class SoundClassExtensions
+    {
+        public static SoundClass Convert(this SoundClass soundClass)
         {
-            ProjectileImpact,
-            ProjectileDetonation,
-            ProjectileFlyby,
-            ProjectileDetonationLod,
-            WeaponFire,
-            WeaponReady,
-            WeaponReload,
-            WeaponEmpty,
-            WeaponCharge,
-            WeaponOverheat,
-            WeaponIdle,
-            WeaponMelee,
-            WeaponAnimation,
-            ObjectImpacts,
-            ParticleImpacts,
-            WeaponFireLod,
-            WeaponFireLodFar,
-            LFE,
-            UnitFootsteps,
-            UnitDialog,
-            UnitAnimation,
-            UnitUnused,
-            VehicleCollision,
-            VehicleEngine,
-            VehicleAnimation,
-            VehicleEngineLod,
-            DeviceDoor,
-            DeviceUnused0,
-            DeviceMachinery,
-            DeviceStationary,
-            DeviceUnused1,
-            DeviceUnused2,
-            Music,
-            AmbientNature,
-            AmbientMachinery,
-            AmbientStationary,
-            HugeAss,
-            ObjectLooping,
-            CinematicMusic,
-            Reflection,
-            ReflectionLod,
-            ReflectionLodFar,
-            UnknownUnused3,
-            UnknownUnused4,
-            MissionUnused0,
-            CortanaMission,
-            CortanaCinematic,
-            MissionDialog,
-            CinematicDialog,
-            ScriptedCinematicFoley,
-            GameEvent,
-            Ui,
-            Test,
-            MultilingualTest
-        }
-
-        public enum SoundClassHalo3Retail : sbyte
-        {
-            ProjectileImpact,
-            ProjectileDetonation,
-            ProjectileFlyby,
-            ProjectileDetonationLod,
-            WeaponFire,
-            WeaponReady,
-            WeaponReload,
-            WeaponEmpty,
-            WeaponCharge,
-            WeaponOverheat,
-            WeaponIdle,
-            WeaponMelee,
-            WeaponAnimation,
-            ObjectImpacts,
-            ParticleImpacts,
-            WeaponFireLod,
-            Unused1Impact,
-            Unused2Impact,
-            UnitFootsteps,
-            UnitDialog,
-            UnitAnimation,
-            UnitUnused,
-            VehicleCollision,
-            VehicleEngine,
-            VehicleAnimation,
-            VehicleEngineLod,
-            DeviceDoor,
-            DeviceUnused0,
-            DeviceMachinery,
-            DeviceStationary,
-            DeviceUnused1,
-            DeviceUnused2,
-            Music,
-            AmbientNature,
-            AmbientMachinery,
-            AmbientStationary,
-            HugeAss,
-            ObjectLooping,
-            CinematicMusic,
-            UnknownUnused0,
-            UnknownUnused1,
-            AmbientFlock,
-            NoPad,
-            NoPadStationary,
-            MissionUnused0,
-            CortanaMission,
-            CortanaGravemindChannel,
-            MissionDialog,
-            CinematicDialog,
-            ScriptedCinematicFoley,
-            GameEvent,
-            Ui,
-            Test,
-            MultilingualTest
-        }
-
-        public enum SoundClassHalo3ODST : sbyte
-        {
-            ProjectileImpact,
-            ProjectileDetonation,
-            ProjectileFlyby,
-            ProjectileDetonationLod,
-            WeaponFire,
-            WeaponReady,
-            WeaponReload,
-            WeaponEmpty,
-            WeaponCharge,
-            WeaponOverheat,
-            WeaponIdle,
-            WeaponMelee,
-            WeaponAnimation,
-            ObjectImpacts,
-            ParticleImpacts,
-            WeaponFireLod,
-            Unused1Impacts,
-            Unused2Impacts,
-            UnitFootsteps,
-            UnitDialog,
-            UnitAnimation,
-            UnitUnused,
-            VehicleCollision,
-            VehicleEngine,
-            VehicleAnimation,
-            VehicleEngineLod,
-            DeviceDoor,
-            DeviceUnused0,
-            DeviceMachinery,
-            DeviceStationary,
-            DeviceUnused1,
-            DeviceUnused2,
-            Music,
-            AmbientNature,
-            AmbientMachinery,
-            AmbientStationary,
-            HugeAss,
-            ObjectLooping,
-            CinematicMusic,
-            UnknownUnused0,
-            UnknownUnused1,
-            AmbientFlock,
-            NoPad,
-            NoPadStationary,
-            Arg,
-            CortanaMission,
-            CortanaGravemindChannel,
-            MissionDialog,
-            CinematicDialog,
-            ScriptedCinematicFoley,
-            GameEvent,
-            Ui,
-            Test,
-            MultilingualTest,
-            AmbientNatureDetails,
-            AmbientMachineryDetails,
-            InsideSurroundTail,
-            OutsideSurroundTail,
-            VehicleDetonation,
-            AmbientDetonation,
-            FirstPersonInside,
-            FirstPersonOutside,
-            FirstPersonAnywhere,
-            UiPda
-        }
-
-        public enum SoundClassHaloOnline : sbyte
-        {
-            ProjectileImpact,
-            ProjectileDetonation,
-            ProjectileFlyby,
-            ProjectileDetonationLod,
-            WeaponFire,
-            WeaponReady,
-            WeaponReload,
-            WeaponEmpty,
-            WeaponCharge,
-            WeaponOverheat,
-            WeaponIdle,
-            WeaponMelee,
-            WeaponAnimation,
-            ObjectImpacts,
-            ParticleImpacts,
-            WeaponFireLod,
-            WeaponFireLodFar,
-            Unused2Impacts,
-            UnitFootsteps,
-            UnitDialog,
-            UnitAnimation,
-            UnitUnused,
-            VehicleCollision,
-            VehicleEngine,
-            VehicleAnimation,
-            VehicleEngineLod,
-            DeviceDoor,
-            DeviceUnused0,
-            DeviceMachinery,
-            DeviceStationary,
-            DeviceUnused1,
-            DeviceUnused2,
-            Music,
-            AmbientNature,
-            AmbientMachinery,
-            AmbientStationary,
-            HugeAss,
-            ObjectLooping,
-            CinematicMusic,
-            PlayerArmor,
-            UnknownUnused1,
-            AmbientFlock,
-            NoPad,
-            NoPadStationary,
-            Arg,
-            CortanaMission,
-            CortanaGravemindChannel,
-            MissionDialog,
-            CinematicDialog,
-            ScriptedCinematicFoley,
-            Hud,
-            GameEvent,
-            Ui,
-            Test,
-            MultilingualTest,
-            AmbientNatureDetails,
-            AmbientMachineryDetails,
-            InsideSurroundTail,
-            OutsideSurroundTail,
-            VehicleDetonation,
-            AmbientDetonation,
-            FirstPersonInside,
-            FirstPersonOutside,
-            FirstPersonAnywhere,
-            UiPda
-        }
-
-        public enum SoundClassHaloReach : sbyte
-        {
-            ProjectileImpact,
-            ProjectileDetonation,
-            ProjectileFlyby,
-            ProjectileDetonationLod,
-            WeaponFire,
-            WeaponReady,
-            WeaponReload,
-            WeaponEmpty,
-            WeaponCharge,
-            WeaponOverheat,
-            WeaponIdle,
-            WeaponMelee,
-            WeaponAnimation,
-            ObjectImpacts,
-            ParticleImpacts,
-            WeaponFireLod,
-            WaterTransition,
-            LowPassEffect,
-            UnitFootsteps,
-            UnitDialog,
-            UnitAnimation,
-            UnitUnused,
-            VehicleCollision,
-            VehicleEngine,
-            VehicleAnimation,
-            VehicleEngineLod,
-            DeviceDoor,
-            DeviceUnused0,
-            DeviceMachinery,
-            DeviceStationary,
-            DeviceUnused1,
-            DeviceUnused2,
-            Music,
-            AmbientNature,
-            AmbientMachinery,
-            AmbientStationary,
-            HugeAss,
-            ObjectLooping,
-            CinematicMusic,
-            UnknownUnused0,
-            UnknownUnused1,
-            AmbientFlock,
-            NoPad,
-            NoPadStationary,
-            EquipmentEffect,
-            MissionDialog,
-            CinematicDialog,
-            ScriptedCinematicFoley,
-            GameEvent,
-            Ui,
-            Test,
-            MultiplayerDialogue,
-            AmbientNatureDetails,
-            AmbientMachineryDetails,
-            InsideSurroundTail,
-            OutsideSurroundTail,
-            VehicleDetonation,
-            AmbientDetonation,
-            FirstPersonInside,
-            FirstPersonOutside,
-            FirstPersonAnywhere,
-            SpaceProjectileDetonation,
-            SpaceProjectileFlyby,
-            SpaceVehicleEngine,
-            SpaceWeaponFire,
-            PlayerVoiceTeam,
-            PlayerVoiceProxy,
-            ProjectileImpactPostpone,
-            UnitFootstepPostpone,
-            WeaponReadyThirdPerson,
-            UiMusic
-        }
-
-        public enum SoundClassHalo : int
-        {
-            ProjectileImpact,
-            ProjectileDetonation,
-            ProjectileFlyby,
-            ProjectileDetonationLod,
-            WeaponFire,
-            WeaponReady,
-            WeaponReload,
-            WeaponEmpty,
-            WeaponCharge,
-            WeaponOverheat,
-            WeaponIdle,
-            WeaponMelee,
-            WeaponAnimation,
-            ObjectImpacts,
-            ParticleImpacts,
-            WeaponFireLod,
-            Unused1Impact,
-            Unused2Impact,
-            UnitFootsteps,
-            UnitDialog,
-            UnitAnimation,
-            UnitUnused,
-            VehicleCollision,
-            VehicleEngine,
-            VehicleAnimation,
-            VehicleEngineLod,
-            DeviceDoor,
-            DeviceUnused0,
-            DeviceMachinery,
-            DeviceStationary,
-            DeviceUnused1,
-            DeviceUnused2,
-            Music,
-            AmbientNature,
-            AmbientMachinery,
-            AmbientStationary,
-            HugeAss,
-            ObjectLooping,
-            CinematicMusic,
-            UnknownUnused0,
-            UnknownUnused1,
-            UnknownUnused2,
-            UnknownUnused3,
-            UnknownUnused4,
-            MissionUnused0,
-            CortanaMission,
-            CortanaCinematic,
-            MissionDialog,
-            CinematicDialog,
-            ScriptedCinematicFoley,
-            GameEvent,
-            Ui,
-            Test,
-            MultilingualTest
-        }
-
-        public SoundClass ConvertSoundClass(CacheVersion from)
-        {
-            string value = null;
-
-            switch (from)
+            return soundClass switch
             {
-                case CacheVersion.Halo2Alpha:
-                case CacheVersion.Halo2Beta:
-                case CacheVersion.Halo2Xbox:
-                case CacheVersion.Halo2PC:
-                    value = Halo2.ToString();
-                    break;
+                Unused1Impacts
+                or Unused2Impacts
+                or Unused1
+                or Unused2
+                or Unused3
+                or MissionUnused0
+                or DialogueUnused0
+                or DialogueUnused1 => Unused,
 
-                case CacheVersion.Halo3Retail:
-                case CacheVersion.Halo3Beta:
-                    value = Halo3Retail.ToString();
-                    break;
+                // Gen1
+                SlowParticleImpacts => ParticleImpacts,
+                DeviceForceField => DeviceStationary,
+                DeviceComputers => DeviceStationary,
+                FirstPersonDamage => FirstPersonAnywhere,
+                // Gen1, Gen2 pre-release builds
+                ScriptedDialoguePlayer => CortanaMission,
+                ScriptedEffect => ScriptedCinematicFoley,
+                ScriptedDialogueOther => MissionDialogue,
+                ScriptedDialogueForceUnspatialized => CortanaGravemindChannel,
+                // Gen2 MCC
+                Reflection => Unused,
+                ReflectionLod => Unused,
+                ReflectionLodFar => Unused,
+                // Reach
+                EquipmentEffect => ObjectLooping,
+                WaterTransitions => AmbientNature,
+                MultiplayerDialogue => GameEvent,
+                SpaceProjectileDetonation => ProjectileDetonation,
+                SpaceProjectileFlyby => ProjectileFlyby,
+                SpaceVehicleEngine => VehicleEngine,
+                SpaceWeaponFire => WeaponFire,
+                PlayerVoiceTeam => GameEvent,
+                PlayerVoiceProxy => GameEvent,
+                ProjectileImpactPostpone => ProjectileImpact,
+                UnitFootstepPostpone => UnitFootsteps,
+                WeaponReadyThirdPerson => WeaponReady,
+                UiMusic => Music,
 
-                case CacheVersion.Halo3ODST:
-                    value = Halo3ODST.ToString();
-                    break;
+                // Fix the surround sound class
+                FirstPersonInside => InsideSurroundTail,
+                FirstPersonOutside => OutsideSurroundTail,
 
-                case CacheVersion.HaloReach:
-                case CacheVersion.HaloReach11883:
-                    value = HaloReach.ToString();
-                    break;
-            }
-
-            if (CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, from))
-                value = HaloOnline.ToString();
-
-            // Fix class to match to equivalent ones
-
-            if (value.Equals("Unused1Impacts") || value.Equals("WaterTransition"))
-                value = "WeaponFireLodFar";
-
-            else if (value.Equals("LowPassEffect"))
-                value = "Unused2Impacts";
-
-            else if (value.Equals("UnknownUnused0"))
-                value = "PlayerArmor";
-
-            else if (value.Equals("MultiplayerDialogue"))
-                value = "MultilingualTest";
-
-            else if (value.Equals("UiMusic"))
-                value = "UiPda";
-
-            // Fixups for Reach new sound classes (might be better to port them later on)
-
-            else if (value.Equals("SpaceProjectileDetonation"))
-                value = "ProjectileDetonation";
-
-            else if (value.Equals("SpaceProjectileFlyby"))
-                value = "ProjectileFlyby";
-
-            else if (value.Equals("SpaceVehicleEngine"))
-                value = "VehicleEngine";
-
-            else if (value.Equals("SpaceWeaponFire"))
-                value = "WeaponFire";
-
-            else if (value.Equals("PlayerVoiceTeam"))
-                value = "UnitDialog";
-
-            else if (value.Equals("PlayerVoiceProxy"))
-                value = "UnitDialog";
-
-            else if (value.Equals("ProjectileImpactPostpone"))
-                value = "ProjectileImpact";
-
-            else if (value.Equals("UnitFootstepPostpone"))
-                value = "UnitFootsteps";
-
-            else if (value.Equals("WeaponReadyThirdPerson"))
-                value = "WeaponReady";
-
-            else if (value.Equals("EquipmentEffect"))
-                value = "ObjectLooping";
-
-            // Fix the surround sound class
-
-            else if (value.Equals("FirstPersonInside"))
-                value = "InsideSurroundTail";
-
-            else if (value.Equals("FirstPersonOutside"))
-                value = "OutsideSurroundTail";
-
-            if (value == null || !Enum.TryParse(value, out HaloOnline))
-            {
-                throw new NotImplementedException($"Failed to parse sound class {value}");
-            }
-
-            return this;
+                _ => soundClass
+            };
         }
     }
 }

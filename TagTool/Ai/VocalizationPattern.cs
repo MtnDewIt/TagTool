@@ -22,17 +22,17 @@ namespace TagTool.Ai
         public PatternFlags Flags;
 
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        public ActorTypeEnum CauseActorType;
+        public DialogueActorType CauseActorType;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public ActorTypeEnumReach CauseActorTypeReach;
+        public DialogueActorTypeReach CauseActorTypeReach;
 
-        public DialogueObjectTypesEnum CauseType;
+        public DialogueObjectType CauseType;
         public StringId CauseAiTypeName;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public StringId CauseEquipmentTypeName;
 
-        public DialogueObjectTypesEnum SpeakerObjectType;
+        public DialogueObjectType SpeakerObjectType;
 
         [TagField(Length = 2, Flags = Padding, MaxVersion = CacheVersion.HaloOnline700123)]
         public byte[] Unused;
@@ -48,25 +48,76 @@ namespace TagTool.Ai
         public DialogueConditionFlags Conditions;
 
         [TagField(EnumType = typeof(short))]
-        public SpatialRelationEnum SpacialRelation;
+        public SpatialRelationEnum SpatialRelation;
         public DamageEnum DamageType;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public GameTypeEnum GameType;
 
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        public ActorTypeEnum SubjectActorType;
+        public DialogueActorType SubjectActorType;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public ActorTypeEnumReach SubjectActorTypeReach;
+        public DialogueActorTypeReach SubjectActorTypeReach;
 
-        public DialogueObjectTypesEnum SubjectType;
+        public DialogueObjectType SubjectType;
 
         [TagField(MinVersion = CacheVersion.HaloReach, Length = 0x2, Flags = Padding)]
         public byte[] PaddingReach;
 
         public StringId SubjectAiTypeName;
 
-        public enum DialogueObjectTypesEnum : short
+        public enum DialogueActorType : short
+        {
+            None,
+            Elite,
+            Jackal,
+            Grunt,
+            Hunter,
+            Engineer,
+            Assassin,
+            Player,
+            Marine,
+            Crew,
+            CombatForm,
+            InfectionForm,
+            CarrierForm,
+            Monitor,
+            Sentinel,
+            None_Unused,
+            MountedWeapon,
+            Brute,
+            Prophet,
+            Bugger,
+            Juggernaut,
+            PureFormStealth,
+            PureFormTank,
+            PureFormRanged,
+            Scarab,
+            Guardian
+        }
+
+        public enum DialogueActorTypeReach : short
+        {
+            None,
+            Player,
+            Marine,
+            Crew,
+            Spartan,
+            Elite,
+            Jackal,
+            Grunt,
+            Brute,
+            Hunter,
+            Prophet,
+            Bugger,
+            Scarab,
+            Engineer,
+            Skirmisher,
+            Mule,
+            MountedWeapon
+        }
+
+        public enum DialogueObjectType : short
         {
             None,
             Player,
@@ -107,7 +158,7 @@ namespace TagTool.Ai
 
         public enum DamageEnum : short
         {
-            NONE,
+            None,
             Falling,
             Bullet,
             Grenade,
@@ -174,7 +225,7 @@ namespace TagTool.Ai
 
         public enum DangerEnum : short
         {
-            NONE,
+            None,
             BroadlyFacing,
             ShootingNear,
             ShootingAt,

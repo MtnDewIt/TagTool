@@ -43,7 +43,7 @@ namespace TagTool.Commands.Scenarios
             {
                 case 0:
                     {
-                        if (Cache.Version == CacheVersion.HaloOnlineED)
+                        if (CacheVersionDetection.IsEldewrito(Cache.Version))
                             scriptFile = new FileInfo($"haloscript\\ED" + fileName);
                         else
                             scriptFile = new FileInfo($"haloscript\\{Cache.Version}" + fileName);

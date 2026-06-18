@@ -193,23 +193,13 @@ namespace TagTool.Cache.HaloOnline
                 throw new ArgumentOutOfRangeException(nameof(resourceIndex));
 
             var resource = Resources[resourceIndex];
-            var writer = new BinaryWriter(resourceStream);
-
-            if (IsResourceShared(resourceIndex))
+            if (resource.Offset == uint.MaxValue || IsResourceShared(resourceIndex))
                 return;
 
-            if (resource.Offset != uint.MaxValue && resource.ChunkSize > 0)
-            {
-                StreamUtil.Copy(resourceStream, resource.Offset + resource.ChunkSize, resource.Offset, resourceStream.Length - resource.Offset);
+            ResizeResource(resourceStream, resourceIndex, 0, shouldUpdateTable: false); 
 
-                for (var i = 0; i < Resources.Count; i++)
-                    if (Resources[i].Offset != uint.MaxValue && Resources[i].Offset > resource.Offset)
-                        Resources[i].Offset = (Resources[i].Offset - resource.ChunkSize);
-            }
-
-            resource.Offset = uint.MaxValue;
             resource.ChunkSize = 0;
-
+            resource.Offset = uint.MaxValue;
             UpdateResourceTable(resourceStream);
         }
 
@@ -335,7 +325,7 @@ namespace TagTool.Cache.HaloOnline
             return resourceIndex;
         }
 
-        private uint ResizeResource(Stream resourceStream, int resourceIndex, uint minSize)
+        private uint ResizeResource(Stream resourceStream, int resourceIndex, uint minSize, bool shouldUpdateTable = true)
         {
             var resource = Resources[resourceIndex];
             var roundedSize = ((minSize + 0xF) & ~0xFU); // Round up to a multiple of 0x10
@@ -351,11 +341,13 @@ namespace TagTool.Cache.HaloOnline
                     Resources[i].Offset = (uint)(Resources[i].Offset + sizeDelta);
             }
                
-            UpdateResourceTable(resourceStream);
+            if(shouldUpdateTable)
+                UpdateResourceTable(resourceStream);
+
             return roundedSize;
         }
 
-        public bool IsResourceShared(int index) => Resources.Where(i => i.Offset == Resources[index].Offset).Count() > 1;
+        public bool IsResourceShared(int index) => Resources.Count(i => i.Offset == Resources[index].Offset) > 1;
 
         public void UpdateResourceTable(Stream resourceStream)
         {

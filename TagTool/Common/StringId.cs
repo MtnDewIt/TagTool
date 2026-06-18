@@ -61,14 +61,35 @@ namespace TagTool.Common
         public bool TryParse(GameCache cache, List<string> args, out IBlamType result, out string error)
         {
             result = null;
+            error = null;
+
             if (args.Count != 1)
             {
                 error = $"{args.Count} arguments supplied; should be 1";
                 return false;
             }
-            result = cache.StringTable.GetStringId(args[0]);
-            error = null;
-            return true;
+
+            switch (args[0])
+            {
+                case "INVALID":
+                    result = Invalid;
+                    return true;
+                case "-1": // retain -1 to unset for scripts
+                case "NULL":
+                case "NONE":
+                case "EMPTY":
+                    result = Empty;
+                    break;
+                default:
+                    result = cache.StringTable.GetStringId(args[0]);
+                    break;
+            }
+
+            if ((StringId)result != Invalid)
+                return true;
+
+            error = $"StringId {args[0]} not found!";
+            return false;
         }
 
         public int CompareTo(StringId other)

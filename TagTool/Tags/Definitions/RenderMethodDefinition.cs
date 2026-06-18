@@ -4,6 +4,7 @@ using TagTool.Shaders;
 using System.Collections.Generic;
 using System;
 using System.IO;
+using System.Linq;
 
 namespace TagTool.Tags.Definitions
 {
@@ -180,6 +181,27 @@ namespace TagTool.Tags.Definitions
                 }
             }
             return -1;
+        }
+        
+        public Dictionary<string,string> GetCategoryOptionMapping(GameCache cache, int[] optionIndices)
+        {
+            if (optionIndices.Length != Categories.Count)
+                new ArgumentException($"Array length does not equal rmdf category count", nameof(optionIndices));
+
+            return Categories.Zip(optionIndices).ToDictionary(
+                c => cache.StringTable.GetString(c.First.Name),
+                c => cache.StringTable.GetString(c.First.ShaderOptions[c.Second].Name));
+        }
+
+        public Dictionary<string, string> GetCategoryOptionMapping(GameCache cache, CachedTag tag)
+        {
+            if (!tag.IsInGroup("rmt2"))
+                new ArgumentException($"Tag is not in group \"render_method_template\"", nameof(tag));
+
+            string str = tag.Name.Split('\\').Last();
+            int[] indices = [.. str.Split('_', StringSplitOptions.RemoveEmptyEntries).Select(int.Parse)];
+
+            return GetCategoryOptionMapping(cache, indices);
         }
     }
 }

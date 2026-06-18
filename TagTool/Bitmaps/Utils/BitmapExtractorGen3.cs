@@ -5,7 +5,13 @@ using TagTool.Tags.Resources;
 
 namespace TagTool.Bitmaps.Utils
 {
-    public class BitmapExtractorGen3
+    public interface IBitmapExtractor
+    {
+        // TODO: consider returning a BaseBitmap
+        byte[] ExtractSurface(int layerIndex, int mipIndex);
+    }
+
+    public class BitmapExtractorGen3 : IBitmapExtractor
     {
         private readonly GameCache Cache;
         private readonly byte[] PrimaryData;

@@ -7,7 +7,7 @@ using TagTool.Tags;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 
-namespace Sytem.IO
+namespace System.IO
 {
     public static class BinaryWriterExtensions
     {

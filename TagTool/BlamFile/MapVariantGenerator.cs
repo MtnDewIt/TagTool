@@ -466,7 +466,7 @@ namespace TagTool.BlamFile
         private bool ObjectIsEarlyMover(CachedTag tag)
         {
             var obje = _cache.Deserialize(_cacheStream, tag) as GameObject;
-            return obje.ObjectFlags.Flags.HasFlag(ObjectFlags.EarlyMoverLocalizedPhysics);
+            return obje.ObjectFlags.Test(ObjectDefinitionFlags.EarlyMoverLocalizedPhysics);
         }
 
         public bool ObjectIsForgeable(CachedTag tag)

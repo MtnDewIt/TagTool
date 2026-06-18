@@ -1,3 +1,4 @@
+using TagTool.Audio;
 using TagTool.Cache;
 using TagTool.Common;
 using System;
@@ -10,9 +11,11 @@ namespace TagTool.Tags.Definitions.Gen1
     [TagStructure(Name = "sound", Tag = "snd!", Size = 0xA4)]
     public class Sound : TagStructure
     {
-        public FlagsValue Flags;
-        public ClassValue Class;
-        public SampleRateValue SampleRate;
+        [TagField(EnumType = typeof(uint))]
+        public BitFlags<SoundFlags> Flags;
+        [TagField(EnumType = typeof(short))]
+        public SoundClass Class;
+        public SampleRate SampleRate;
         /// <summary>
         /// the distance below which this sound no longer gets louder
         /// </summary>
@@ -67,6 +70,7 @@ namespace TagTool.Tags.Definitions.Gen1
         public float PitchModifier1;
         [TagField(Length = 0xC)]
         public byte[] Padding2;
+        [TagField(EnumType = typeof(short))]
         public EncodingValue Encoding;
         public CompressionValue Compression;
         [TagField(ValidTags = new [] { "snd!" })]
@@ -84,80 +88,6 @@ namespace TagTool.Tags.Definitions.Gen1
         /// pitch ranges allow multiple samples to represent the same sound at different pitches
         /// </summary>
         public List<SoundPitchRangeBlock> PitchRanges;
-        
-        [Flags]
-        public enum FlagsValue : uint
-        {
-            FitToAdpcmBlocksize = 1 << 0,
-            SplitLongSoundIntoPermutations = 1 << 1
-        }
-        
-        public enum ClassValue : short
-        {
-            ProjectileImpact,
-            ProjectileDetonation,
-            Unknown,
-            Unknown1,
-            WeaponFire,
-            WeaponReady,
-            WeaponReload,
-            WeaponEmpty,
-            WeaponCharge,
-            WeaponOverheat,
-            WeaponIdle,
-            Unknown2,
-            Unknown3,
-            ObjectImpacts,
-            ParticleImpacts,
-            SlowParticleImpacts,
-            Unknown4,
-            Unknown5,
-            UnitFootsteps,
-            UnitDialog,
-            Unknown6,
-            Unknown7,
-            VehicleCollision,
-            VehicleEngine,
-            Unknown8,
-            Unknown9,
-            DeviceDoor,
-            DeviceForceField,
-            DeviceMachinery,
-            DeviceNature,
-            DeviceComputers,
-            Unknown10,
-            Music,
-            AmbientNature,
-            AmbientMachinery,
-            AmbientComputers,
-            Unknown11,
-            Unknown12,
-            Unknown13,
-            FirstPersonDamage,
-            Unknown14,
-            Unknown15,
-            Unknown16,
-            Unknown17,
-            ScriptedDialogPlayer,
-            ScriptedEffect,
-            ScriptedDialogOther,
-            ScriptedDialogForceUnspatialized,
-            Unknown18,
-            Unknown19,
-            GameEvent
-        }
-        
-        public enum SampleRateValue : short
-        {
-            _22khz,
-            _44khz
-        }
-        
-        public enum EncodingValue : short
-        {
-            Mono,
-            Stereo
-        }
         
         public enum CompressionValue : short
         {

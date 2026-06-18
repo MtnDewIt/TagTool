@@ -50,7 +50,6 @@ namespace TagTool.Commands.Tags
             bool batchImport = false;
 
             Tag groupTag = new Tag("bitm");
-            TagGroup tagGroup = Cache.TagCache.TagDefinitions.GetTagGroupFromTag(groupTag);
             BitmapImageCurve curve = BitmapImageCurve.xRGB;
 
             // flags

@@ -1,32 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO.Compression;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 using TagTool.Bitmaps;
-using TagTool.Commands.Common;
+using TagTool.Bitmaps.DDS;
+using TagTool.Bitmaps.Utils;
+using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Common.Logging;
 using TagTool.IO;
 using TagTool.Tags.Definitions;
+using static TagTool.Bitmaps.Utils.SurfaceLayout;
 using BitmapGen2 = TagTool.Tags.Definitions.Gen2.Bitmap;
-using TagTool.Cache;
-using TagTool.Bitmaps.DDS;
-using TagTool.Common.Logging;
 
 namespace TagTool.Commands.Gen2.Bitmaps
 {
     public static class BitmapConverterGen2
     {
-        public static BaseBitmap ExtractBitmap(GameCacheGen2 cache, BitmapGen2 gen2Bitmap, int imageIndex)
+        public static BaseBitmap ExtractBitmap(GameCacheGen2 cache, BitmapGen2 gen2Bitmap, int imageIndex, string tagName = "", bool forDDS = true, ConverterOptions options = null)
         {
-            BitmapGen2.BitmapDataBlock gen2Img = gen2Bitmap.Bitmaps[imageIndex];
-            byte[] rawBitmapData = ConvertBitmapData(cache, gen2Bitmap, gen2Img);
-            Bitmap.Image newImg = ConvertBitmapImage(cache, gen2Img, rawBitmapData);
-            return new BaseBitmap(newImg, rawBitmapData);
+            return ConvertBitmap(cache, gen2Bitmap, imageIndex, out _, tagName, forDDS, options);
         }
+
         public static DDSFile ExtractBitmapDDS(GameCacheGen2 cache, BitmapGen2 bitmap, int imageIndex)
         {
             var baseBitmap = ExtractBitmap(cache, bitmap, imageIndex);
@@ -36,52 +30,160 @@ namespace TagTool.Commands.Gen2.Bitmaps
             return new DDSFile(baseBitmap);
         }
 
-        public static byte[] ConvertBitmapData(GameCacheGen2 cache, BitmapGen2 gen2Bitmap, BitmapGen2.BitmapDataBlock gen2Img)
+        public static BaseBitmap ConvertBitmap(GameCacheGen2 cache, BitmapGen2 gen2Bitmap, int imageIndex, out Bitmap.Image newImg, string tagName = "", bool forDDS = false, ConverterOptions options = null)
         {
-            //get raw bitmap data and create resource
-            byte[] rawBitmapData = cache.GetCacheRawData((uint)gen2Img.Lod0Pointer, gen2Img.Lod0Size);
+            options ??= ConverterOptions.Default;
 
-            //h2v raw bitmap data is gz compressed
-            if (cache.Version == CacheVersion.Halo2PC)
+            var extractor = new BitmapExtractorGen2(cache, gen2Bitmap, imageIndex);
+            var compressionQuality = options.HqNormalMapCompression ? CompressionQuality.High : CompressionQuality.Default;
+
+            var gen2Img = gen2Bitmap.Bitmaps[imageIndex];
+
+            BitmapFormat format = BitmapUtilsGen2.MapBitmapFormat(gen2Img.Format);
+            BitmapFormat destFormat = GetDestFormat(cache, gen2Bitmap, imageIndex, options);
+
+            bool needDxt5nmSwizzle = false;
+            ApplyConstraints(tagName, gen2Img, ref destFormat, ref needDxt5nmSwizzle);
+            ApplyOptimization(tagName, gen2Img, extractor, ref destFormat);
+
+            int mipCount = gen2Img.MipmapCount + 1;
+            // - h2x has invalid mips < 4x4 for compressed bitmaps - We could gen them in future
+            // - d3d9 doesn't allow for dxn to have mips < 4x4
+            bool shouldTruncateMips = destFormat == BitmapFormat.Dxn ||
+                (cache.Version != CacheVersion.HaloPC && gen2Img.Flags.HasFlag(BitmapGen2.BitmapDataBlock.FlagsValue.Compressed));
+
+            if (shouldTruncateMips)
+                mipCount = BitmapUtils.GetMipmapCountTruncate(gen2Img.Width, gen2Img.Height, 4, 4, mipCount);
+
+            var destLayout = SurfaceLayout.BuildLayout(
+               BitmapUtilsGen2.MapBitmapType(gen2Img.Type),
+               format,
+               gen2Img.Width,
+               gen2Img.Height,
+               gen2Img.Depth,
+               mipCount,
+               new LayoutOptions
+               {
+                   CubeLayout = forDDS ? CubeMapLayout.FaceMajor : CubeMapLayout.MipMajor
+               });
+
+            var resultStream = new MemoryStream();
+
+            foreach (SurfaceDesc surface in destLayout.Values)
             {
-                using (var stream = new MemoryStream(rawBitmapData))
-                using (var resultStream = new MemoryStream())
-                using (var zstream = new ZLibStream(stream, CompressionMode.Decompress))
+                byte[] surfaceData = extractor.ExtractSurface(surface.Layer, surface.Mip);
+
+                surfaceData = ConvertBitmapData(gen2Img, surfaceData, out BitmapFormat newFormat);
+
+                if (destFormat != newFormat || needDxt5nmSwizzle)
                 {
-                    zstream.CopyTo(resultStream);
-                    rawBitmapData = resultStream.ToArray();
+                    surfaceData = BitmapDecoder.DecodeBitmap(surfaceData, newFormat, surface.Width, surface.Height, cache.Version, cache.Platform);
+
+                    if (needDxt5nmSwizzle)
+                        surfaceData = BitmapConversionHelpers.SwizzleForDXT5nm(surfaceData);
+
+                    surfaceData = BitmapDecoder.EncodeBitmap(surfaceData, destFormat, surface.Width, surface.Height, compressionQuality);
                 }
+
+                resultStream.Write(surfaceData);
             }
 
-            //deswizzle
-            if (gen2Img.Flags.HasFlag(BitmapGen2.BitmapDataBlock.FlagsValue.Swizzled))
-            {
-                rawBitmapData = Swizzle(rawBitmapData, gen2Img.Width, gen2Img.Height, gen2Img.Depth,
-                    CalculateBytesPerPixel(gen2Img), true);
-            }
+            byte[] data = resultStream.ToArray();
 
-            //handle p8_bump format using bump palette
-            if (gen2Img.Format == BitmapGen2.BitmapDataBlock.FormatValue.P8Bump)
-            {
-                var outStream = new MemoryStream();
-                var outWriter = new EndianWriter(outStream);
-                foreach (var pix in rawBitmapData)
-                    outWriter.Write(bumpPalette[pix]);
-                rawBitmapData = outStream.ToArray();
-            }           
-            else if (gen2Img.Flags.HasFlag(BitmapGen2.BitmapDataBlock.FlagsValue.Palettized))
-                //convert palettized formats to A8R8B8G8
-                rawBitmapData = ConvertP8BitmapData(rawBitmapData);
+            newImg = ConvertBitmapImage(cache, gen2Img, data, destFormat, mipCount);
 
-            //normalize X8R8G8B8 bumpmaps
-            //if (gen2Img.Format == BitmapGen2.BitmapDataBlock.FormatValue.X8r8g8b8 &&
-            //    gen2Bitmap.Usage == BitmapGen2.UsageValue.HeightMap)
-            //    rawBitmapData = NormalizeX8R8G8B8HeightMap(rawBitmapData);
-
-            return rawBitmapData;
+            return new BaseBitmap(newImg, data);
         }
 
-        public static Bitmap.Image ConvertBitmapImage(GameCacheGen2 cache, BitmapGen2.BitmapDataBlock gen2Img, byte[] rawBitmapData)
+        private static void ApplyConstraints(string tagName, BitmapGen2.BitmapDataBlock gen2Img, ref BitmapFormat destFormat, ref bool needDxt5nmSwizzle)
+        {
+            if (BitmapUtils.IsCompressedFormat(destFormat))
+            {
+                if (destFormat == BitmapFormat.Dxn && !BitmapUtils.IsPowerOfTwo(gen2Img.Width, gen2Img.Height))
+                {
+                    destFormat = BitmapFormat.V8U8;
+                    Log.Warning($"DXN bitmap '{tagName}' has invalid dimensions {gen2Img.Width}x{gen2Img.Height} (must be pow2); Using {destFormat}.");
+                }
+                else if (!BitmapUtils.IsBlockAligned(gen2Img.Width, gen2Img.Height))
+                {
+                    if (destFormat == BitmapFormat.Dxt5nm)
+                    {
+                        destFormat = BitmapFormat.A8Y8;
+                        needDxt5nmSwizzle = true;
+                    }
+                    else
+                    {
+                        destFormat = BitmapFormat.A8R8G8B8;
+                    }
+                    Log.Warning($"DXTn bitmap '{tagName}' has invalid dimensions {gen2Img.Width}x{gen2Img.Height} (must be divisible by 4); Using {destFormat}.");
+                }
+            }
+        }
+
+        private static void ApplyOptimization(string tagName, BitmapGen2.BitmapDataBlock gen2Img, IBitmapExtractor extrator, ref BitmapFormat destFormat)
+        {
+            if (gen2Img.Type != BitmapGen2.BitmapDataBlock.TypeValue._2dTexture || destFormat != BitmapFormat.A8R8G8B8)
+                return;
+
+            BitmapFormat chosenFormat = BitmapFormatSelector.ChooseOptimalBitmapFormat(
+                extrator.ExtractSurface(0, 0), gen2Img.Width, gen2Img.Height, destFormat, Bitmap.BitmapUsageFormat.UseDefaultDefinedByUsage);
+
+            if (chosenFormat != destFormat)
+            {
+                Log.Info($"Using {chosenFormat} instead of {destFormat} for bitmap '{tagName}'");
+                destFormat = chosenFormat;
+            }
+        }
+
+        private static BitmapFormat GetDestFormat(GameCacheGen2 cache, BitmapGen2 gen2Bitmap, int imageIndex, ConverterOptions options)
+        {
+            var gen2Img = gen2Bitmap.Bitmaps[imageIndex];
+
+            if (BitmapUtilsGen2.IsNormalMap(cache, gen2Bitmap, imageIndex))
+                return GetNormalMapFormat(gen2Bitmap, imageIndex, options);
+
+            switch (gen2Img.Format)
+            {
+                case BitmapGen2.BitmapDataBlock.FormatValue.P8:
+                    return BitmapFormat.A8R8G8B8;
+            }
+
+            return BitmapUtilsGen2.MapBitmapFormat(gen2Img.Format);
+        }
+
+        private static BitmapFormat GetNormalMapFormat(BitmapGen2 bitmap, int imageIndex, ConverterOptions options)
+        {
+            var gen2Img = bitmap.Bitmaps[imageIndex];
+
+            if (options.ForceDxt5nm)
+                return BitmapFormat.Dxt5nm;
+
+            if (gen2Img.Format == BitmapGen2.BitmapDataBlock.FormatValue.V8u8)
+                return BitmapFormat.V8U8;
+
+            return options.HqNormalMapCompression ? BitmapFormat.Dxn : BitmapFormat.Dxt1;
+        }
+
+        private static byte[] ConvertBitmapData(BitmapGen2.BitmapDataBlock bitmap, byte[] data, out BitmapFormat newFormat)
+        {
+            newFormat = BitmapUtilsGen2.MapBitmapFormat(bitmap.Format);
+
+            if (bitmap.Format == BitmapGen2.BitmapDataBlock.FormatValue.P8)
+            {
+                newFormat = BitmapFormat.A8R8G8B8;
+                return ConvertP8BitmapData(data);
+            }
+
+            if (bitmap.Format == BitmapGen2.BitmapDataBlock.FormatValue.P8Bump)
+            {
+                newFormat = BitmapFormat.A8R8G8B8;
+                return ConvertP8BumpData(data);
+            }
+
+            return data;
+        }
+
+        public static Bitmap.Image ConvertBitmapImage(GameCacheGen2 cache, BitmapGen2.BitmapDataBlock gen2Img, byte[] rawBitmapData, BitmapFormat destFormat, int mipCount)
         {
             Bitmap.Image newImg = new Bitmap.Image
             {
@@ -89,10 +191,10 @@ namespace TagTool.Commands.Gen2.Bitmaps
                 Width = gen2Img.Width,
                 Height = gen2Img.Height,
                 Depth = gen2Img.Depth,
-                Type = ConvertBitmapType(gen2Img.Type),
-                Format = ConvertBitmapFormat(gen2Img.Format),
+                Type = BitmapUtilsGen2.MapBitmapType(gen2Img.Type),
+                Format = destFormat,
                 RegistrationPoint = gen2Img.RegistrationPoint,
-                MipmapCount = (sbyte)gen2Img.MipmapCount,
+                MipmapCount = (sbyte)(mipCount - 1),
                 Flags = new BitmapFlags(),
                 Curve = BitmapImageCurve.xRGB, //default to this for now
             };
@@ -101,45 +203,11 @@ namespace TagTool.Commands.Gen2.Bitmaps
                 newImg.Flags |= BitmapFlags.PowerOfTwoDimensions;
             if (gen2Img.Flags.HasFlag(BitmapGen2.BitmapDataBlock.FlagsValue.Compressed))
                 newImg.Flags |= BitmapFlags.Compressed;
-            if (gen2Img.Flags.HasFlag(BitmapGen2.BitmapDataBlock.FlagsValue.Palettized))
-                newImg.Format = BitmapFormat.A8R8G8B8;
 
             //set pixel data size after decompression and modification
             newImg.PixelDataSize = rawBitmapData.Length;
 
             return newImg;
-        }
-
-        public static void PostprocessBitmap(BaseBitmap baseBitmap, BitmapGen2 bitm, Bitmap.Image image, string gen2TagName)
-        {
-            // convert XRGB8 bumpmaps to DXN
-            if (image.Format == BitmapFormat.X8R8G8B8 && bitm.Usage == BitmapGen2.UsageValue.HeightMap)
-            {
-                // convert to raw RGBA
-                byte[] rawData = BitmapDecoder.DecodeBitmap(baseBitmap.Data, image.Format, image.Width, image.Height);
-
-                for (int i = 0; i < rawData.Length; i += 4)
-                {
-                    rawData[i + 0] = rawData[i + 0];//(byte)((((rawData[i + 0] / 255.0f) + 1.007874015748031f) / 2.007874015748031f) * 255.0f);
-                    rawData[i + 1] = rawData[i + 1];//(byte)((((rawData[i + 1] / 255.0f) + 1.007874015748031f) / 2.007874015748031f) * 255.0f);
-                    rawData[i + 2] = rawData[i + 2];//(byte)((((rawData[i + 2] / 255.0f) + 1.007874015748031f) / 2.007874015748031f) * 255.0f);
-                    rawData[i + 3] = 0xFF;
-                }
-
-                // Prevent memory allocation crash
-                BitmapUtils.TrimLowestMipmaps(baseBitmap);
-
-                //Truncate all mipmaps for now -- TODO: fix
-                byte[] truncatedData = rawData.Take(image.Width * image.Height * 4).ToArray();
-
-                baseBitmap.Data = BitmapDecoder.EncodeBitmap(truncatedData, BitmapFormat.Dxn, image.Width, image.Height);
-
-                image.MipmapCount = (sbyte)(baseBitmap.MipMapCount - 1);
-
-                baseBitmap.UpdateFormat(BitmapFormat.Dxn);
-                baseBitmap.Flags |= BitmapFlags.Compressed;
-                image.Format = BitmapFormat.Dxn;
-            }
         }
 
         private static byte[] ConvertP8BitmapData(byte[] data)
@@ -159,6 +227,18 @@ namespace TagTool.Commands.Gen2.Bitmaps
                     writer.Write(palette[reader.ReadByte()].GetValue());
             }
             return outputdata;
+        }
+
+        private static byte[] ConvertP8BumpData(byte[] data)
+        {
+            var outStream = new MemoryStream();
+            var outWriter = new EndianWriter(outStream);
+
+            foreach (var pix in data)
+                outWriter.Write(bumpPalette[pix]);
+
+            data = outStream.ToArray();
+            return data;
         }
 
         private static byte[] NormalizeX8R8G8B8HeightMap(byte[] data)
@@ -184,150 +264,6 @@ namespace TagTool.Commands.Gen2.Bitmaps
                 }
                 return outStream.ToArray();
             }
-        }
-
-        private static int CalculateBytesPerPixel(BitmapGen2.BitmapDataBlock gen2Img)
-        {
-            int bitsperpixel = 16;
-            //handle p8 and p8bump deswizzle
-            switch (gen2Img.Format)
-            {
-                case BitmapGen2.BitmapDataBlock.FormatValue.P8:
-                case BitmapGen2.BitmapDataBlock.FormatValue.P8Bump:
-                    bitsperpixel = 8;
-                    break;
-                default:
-                    bitsperpixel = BitmapFormatUtils.GetBitsPerPixel(ConvertBitmapFormat(gen2Img.Format));
-                    break;
-            }
-            return bitsperpixel / 8;
-        }
-
-        private static BitmapType ConvertBitmapType(BitmapGen2.BitmapDataBlock.TypeValue type)
-        {
-            switch (type)
-            {
-                case BitmapGen2.BitmapDataBlock.TypeValue._2dTexture:
-                    return BitmapType.Texture2D;
-                case BitmapGen2.BitmapDataBlock.TypeValue._3dTexture:
-                    return BitmapType.Texture3D;
-                case BitmapGen2.BitmapDataBlock.TypeValue.CubeMap:
-                    return BitmapType.CubeMap;
-                default:
-                    return BitmapType.Texture2D;
-            }
-        }
-
-        private static BitmapFormat ConvertBitmapFormat(BitmapGen2.BitmapDataBlock.FormatValue format)
-        {
-            BitmapFormat result;
-            if (format == BitmapGen2.BitmapDataBlock.FormatValue.P8Bump)
-                return BitmapFormat.A8R8G8B8;
-            else if (format == BitmapGen2.BitmapDataBlock.FormatValue.P8)
-                return BitmapFormat.A8;
-            else if (Enum.TryParse(format.ToString(), true, out result))
-                return result;
-            else
-            {
-                Log.Error($"Failed to find bitmap format matching {format}");
-                return BitmapFormat.A8R8G8B8;
-            }
-        }
-
-        /* http://www.h2maps.net/Tools/Xbox/Mutation/Mutation/DDS/Swizzle.cs */
-
-        private class MaskSet
-        {
-            public readonly int X;
-            public readonly int Y;
-            public readonly int Z;
-
-            public MaskSet(int w, int h, int d)
-            {
-                var bit = 1;
-                var index = 1;
-
-                while (bit < w || bit < h || bit < d)
-                {
-                    if (bit < w)
-                    {
-                        X |= index;
-                        index <<= 1;
-                    }
-
-                    if (bit < h)
-                    {
-                        Y |= index;
-                        index <<= 1;
-                    }
-
-                    if (bit < d)
-                    {
-                        Z |= index;
-                        index <<= 1;
-                    }
-
-                    bit <<= 1;
-                }
-            }
-        }
-
-        public static byte[] Swizzle(byte[] data, int width, int height, int depth, int bpp) => Swizzle(data, width, height, depth, bpp, true);
-
-        public static byte[] Swizzle(byte[] data, int width, int height, int depth, int bpp, bool deswizzle)
-        {
-            int a, b;
-            var output = new byte[data.Length];
-
-            var masks = new MaskSet(width, height, depth);
-            for (var y = 0; y < height * depth; y++)
-            {
-                for (var x = 0; x < width; x++)
-                {
-                    if (deswizzle)
-                    {
-                        a = ((y * width) + x) * bpp;
-                        b = Swizzle(x, y, depth, masks) * bpp;
-                    }
-                    else
-                    {
-                        b = ((y * width) + x) * bpp;
-                        a = Swizzle(x, y, depth, masks) * bpp;
-                    }
-
-                    if (a < output.Length && b < data.Length)
-                    {
-                        for (var i = 0; i < bpp; i++)
-                            output[a + i] = data[b + i];
-                    }
-                    else
-                        return null;
-                }
-            }
-
-            return output;
-        }
-
-        private static int Swizzle(int x, int y, int z, MaskSet masks) => SwizzleAxis(x, masks.X) | SwizzleAxis(y, masks.Y) | (z == -1 ? 0 : SwizzleAxis(z, masks.Z));
-
-        private static int SwizzleAxis(int val, int mask)
-        {
-            var bit = 1;
-            var result = 0;
-
-            while (bit <= mask)
-            {
-                var tmp = mask & bit;
-
-                if (tmp != 0)
-                    result |= val & bit;
-                else
-                    val <<= 1;
-
-                bit <<= 1;
-            }
-
-            return result;
         }
 
         static uint[] bumpPalette = new uint[]{0xFF7E7EFF, 0xFF7F7EFF, 0xFF807EFF, 0xFF817EFF, 0xFF7E7FFF, 0xFF7F7FFF,
@@ -359,5 +295,14 @@ namespace TagTool.Commands.Gen2.Bitmaps
             0xDED396FF, 0xDE33A8FF, 0xDD9E2FFF, 0xDDA1D1FF, 0xDD315BFF, 0xDCD466FF, 0xDC54CCFF, 0xDC6D29FF, 0xDBC9B3FF,
             0xDB278CFF, 0xDBBA3BFF, 0xDA84DAFF, 0xDA4040FF, 0xD9DB84FF, 0xD93ABBFF, 0xD98C25FF, 0xD8B5CBFF, 0xD8266CFF,
             0xD8D052FF, 0xD764D9FF, 0xD7592BFF, 0xD6D7A4FF, 0xD627A0FF, 0xD6AC2CFF, 0xFF808000};
+
+        public record ConverterOptions
+        {
+            public bool HqNormalMapCompression { get; init; } = false;
+
+            public bool ForceDxt5nm { get; init; } = false;
+
+            public static readonly ConverterOptions Default = new();
+        }
     }
 }

@@ -67,6 +67,9 @@ namespace TagTool.Commands.Tags
 
         public void PerformSearch(CachedTag tag, string phrase)
         {
+            if (!Cache.TagCache.TagDefinitions.TagDefinitionExists(tag.Group))
+                return;
+
             using (var stream = Cache.OpenCacheRead())
             {
                 var definition = Cache.Deserialize(stream, tag);
@@ -100,7 +103,7 @@ namespace TagTool.Commands.Tags
                         {
                             try
                             {
-                                var stringValue = Cache.StringTable.GetString(stringId);
+                                var stringValue = Cache.StringTable.GetString(stringId) ?? "";
                                 if (stringValue.ToLower().Contains(phrase))
                                     Console.WriteLine($"{outputPrefix}{path} = {stringValue}");
                             }

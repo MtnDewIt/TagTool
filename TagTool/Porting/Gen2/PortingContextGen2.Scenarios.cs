@@ -21,6 +21,7 @@ using TagTool.Tags.Resources;
 using static TagTool.Porting.Gen2.Gen2BspGeometryConverter;
 using static TagTool.Tags.Definitions.Scenario;
 using static TagTool.Tags.Definitions.Scenario.SpawnDatum;
+using static TagTool.Tags.Definitions.Scenario.ZoneSetPvsBlock;
 using Gen2Scenario = TagTool.Tags.Definitions.Gen2.Scenario;
 using Gen2ScenarioStructureBsp = TagTool.Tags.Definitions.Gen2.ScenarioStructureBsp;
 
@@ -339,49 +340,38 @@ namespace TagTool.Porting.Gen2
                 newScenario.ZoneSetPvs[i].StructureBspPvs.Add(new Scenario.ZoneSetPvsBlock.BspPvsBlock());
                 AutoConverter.InitTagBlocks(newScenario.ZoneSetPvs[i].StructureBspPvs[0]);
 
-                int pvsbits = 0;
+                var allClustersBitVector = new BitVectorDword[(currentbsp.Clusters.Count + 31) >> 5];
                 for (var k = 0; k < currentbsp.Clusters.Count; k++)
-                {
-                    pvsbits |= 1 << k;
-                }
+                    (allClustersBitVector[k >> 5] ??= new()).Bits |= (BitVectorDword.DwordBits)(1u << (k & 31));
+
+                var connectedClusters = currentbsp.Clusters.Select((_, i) => (byte)i );
 
                 for (var j = 0; j < currentbsp.Clusters.Count; j++)
                 {
                     newScenario.ZoneSetPvs[i].StructureBspPvs[0].ClusterPvs.Add(new Scenario.ZoneSetPvsBlock.BspPvsBlock.ClusterPvsBlock
                     {
                         ClusterPvsBitVectors = new List<Scenario.ZoneSetPvsBlock.BspPvsBlock.ClusterPvsBlock.CluserPvsBitVectorBlock>
+                    {
+                        new Scenario.ZoneSetPvsBlock.BspPvsBlock.ClusterPvsBlock.CluserPvsBitVectorBlock
                         {
-                            new Scenario.ZoneSetPvsBlock.BspPvsBlock.ClusterPvsBlock.CluserPvsBitVectorBlock
-                            {
-                                Bits = new List<Scenario.ZoneSetPvsBlock.BitVectorDword>
-                                {
-                                    new Scenario.ZoneSetPvsBlock.BitVectorDword
-                                    {
-                                        Bits = (Scenario.ZoneSetPvsBlock.BitVectorDword.DwordBits)pvsbits
-                                    }
-                                }
-                            }
+                            Bits = [..allClustersBitVector]
                         }
+                    }
                     });
                     newScenario.ZoneSetPvs[i].StructureBspPvs[0].ClusterPvsDoorsClosed.Add(new Scenario.ZoneSetPvsBlock.BspPvsBlock.ClusterPvsBlock
                     {
                         ClusterPvsBitVectors = new List<Scenario.ZoneSetPvsBlock.BspPvsBlock.ClusterPvsBlock.CluserPvsBitVectorBlock>
+                    {
+                        new Scenario.ZoneSetPvsBlock.BspPvsBlock.ClusterPvsBlock.CluserPvsBitVectorBlock
                         {
-                            new Scenario.ZoneSetPvsBlock.BspPvsBlock.ClusterPvsBlock.CluserPvsBitVectorBlock
-                            {
-                                Bits = new List<Scenario.ZoneSetPvsBlock.BitVectorDword>
-                                {
-                                    new Scenario.ZoneSetPvsBlock.BitVectorDword
-                                    {
-                                        Bits = (Scenario.ZoneSetPvsBlock.BitVectorDword.DwordBits)pvsbits
-                                    }
-                                }
-                            }
+                            Bits = [..allClustersBitVector]
                         }
+                    }
                     });
+
                     newScenario.ZoneSetPvs[i].StructureBspPvs[0].AttachedSkyIndices.Add(new Scenario.ZoneSetPvsBlock.BspPvsBlock.SkyIndicesBlock());
                     newScenario.ZoneSetPvs[i].StructureBspPvs[0].VisibleSkyIndices.Add(new Scenario.ZoneSetPvsBlock.BspPvsBlock.SkyIndicesBlock());
-                    newScenario.ZoneSetPvs[i].StructureBspPvs[0].ClusterMappings.Add(new Scenario.ZoneSetPvsBlock.BspPvsBlock.BspSeamClusterMapping());
+                    newScenario.ZoneSetPvs[i].StructureBspPvs[0].ClusterMappings.Add(new Scenario.ZoneSetPvsBlock.BspPvsBlock.BspSeamClusterMapping() { Clusters = [.. connectedClusters] });
                     newScenario.ZoneSetPvs[i].StructureBspPvs[0].ClusterAudioBitvector.Add(new Scenario.ZoneSetPvsBlock.BitVectorDword());
                 }
 

@@ -19,6 +19,27 @@ namespace TagTool.Common
         public float m42 { get; set; }
         public float m43 { get; set; }
 
+        public RealVector3d Forward
+        {
+            get => new RealVector3d(m11, m12, m13);
+            set => Forward = value;
+        } 
+        public RealVector3d Left
+        {
+            get => new RealVector3d(m21, m22, m23);
+            set => Left = value;
+        }
+        public RealVector3d Up
+        {
+            get => new RealVector3d(m31, m32, m33);
+            set => Up = value;
+        }
+        public RealPoint3d Position
+        {
+            get => new RealPoint3d(m41, m42, m43);
+            set => Position = value;
+        }
+
         public bool IsIdentity =>
             (m11 == 1.0f && m12 == 0.0f && m13 == 0.0f &&
              m21 == 0.0f && m22 == 1.0f && m23 == 0.0f &&
@@ -56,6 +77,15 @@ namespace TagTool.Common
             m21 = M21; m22 = M22; m23 = M23;
             m31 = M31; m32 = M32; m33 = M33;
             m41 = M41; m42 = M42; m43 = M43;
+        }
+
+        public RealMatrix4x3(
+            RealVector3d forward, 
+            RealVector3d left, 
+            RealVector3d up, 
+            RealPoint3d position)
+        {
+            Forward = forward; Left = left; Up = up; Position = position;    
         }
 
         public static RealMatrix4x3 operator *(RealMatrix4x3 matrix1, RealMatrix4x3 matrix2)

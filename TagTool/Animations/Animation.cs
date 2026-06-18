@@ -8,6 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using TagTool.Geometry.Utils;
 
 namespace TagTool.Animations
 {
@@ -223,7 +224,7 @@ namespace TagTool.Animations
 
         public void Export(string fileName)
         {
-            using (TextWriter text = (TextWriter)File.CreateText(fileName))
+            using (var text = BlamAssetWriter.Create(new(fileName)))
             {
                 text.WriteLine(16392);
                 text.WriteLine(this.Frames.Length);
@@ -242,12 +243,12 @@ namespace TagTool.Animations
                 {
                     for (int index2 = 0; index2 < this.Nodes.Length; ++index2)
                     {
-                        Quaternion Quaternion = Quaternion.Conjugate(this.Frames[index1].Nodes[index2].Rotation);
+                        Quaternion rotation = Quaternion.Conjugate(this.Frames[index1].Nodes[index2].Rotation);
                         RealPoint3d translation = this.Frames[index1].Nodes[index2].Translation;
                         float scale = this.Frames[index1].Nodes[index2].Scale;
-                        text.WriteLine(string.Format("{0}\t{1}\t{2}", translation.X, translation.Y, translation.Z));
-                        text.WriteLine(string.Format("{0}\t{1}\t{2}\t{3}", Quaternion.X, Quaternion.Y, Quaternion.Z, Quaternion.W));
-                        text.WriteLine(scale);
+                        text.WritePoint3d(translation);
+                        text.WriteQuaternion(rotation);
+                        text.WriteFloat(scale);
                     }
                 }
                 text.Flush();

@@ -40,38 +40,20 @@ namespace TagTool.Scripting
 
         private static string GetFileNameForVersion(CacheVersion version, CachePlatform platform)
         {
-            switch (version)
+            return version switch
             {
-                case CacheVersion.Halo2PC when platform == CachePlatform.MCC:
-                    return "halo2_mcc";
-
-                case CacheVersion.Halo3Retail when platform == CachePlatform.MCC:
-                    return "halo3_mcc";
-
-                case CacheVersion.Halo3ODST when platform == CachePlatform.MCC:
-                    return "halo3_odst_mcc";
-
-                case CacheVersion.HaloReach when platform == CachePlatform.MCC:
-                    return "halo_reach_mcc";
-
-                case CacheVersion.Halo2PC:
-                    return "halo2_vista";
-
-                case CacheVersion.Halo3Retail:
-                    return "halo3";
-
-                case CacheVersion.Halo3ODST:
-                    return "halo3_odst";
-
-                case CacheVersion.HaloReach:
-                    return "halo_reach";
-
-                case CacheVersion.HaloOnline106708:
-                case CacheVersion.HaloOnlineED:
-                    return "halo_online_ed";
-            }
-
-            return null;
+                CacheVersion.Halo2PC when platform == CachePlatform.MCC => "halo2_mcc",
+                CacheVersion.Halo3Retail when platform == CachePlatform.MCC => "halo3_mcc",
+                CacheVersion.Halo3ODST when platform == CachePlatform.MCC => "halo3_odst_mcc",
+                CacheVersion.HaloReach when platform == CachePlatform.MCC => "halo_reach_mcc",
+                CacheVersion.Halo2PC => "halo2_vista",
+                CacheVersion.Halo3Retail => "halo3",
+                CacheVersion.Halo3ODST => "halo3_odst",
+                CacheVersion.HaloReach => "halo_reach",
+                CacheVersion.HaloOnline106708 => "halo_online_ed", // TODO: separate
+                >= CacheVersion.HaloOnlineED and < CacheVersion.HaloOnlineED_END => "halo_online_ed",
+                _ => null,
+            };
         }
     }
 }

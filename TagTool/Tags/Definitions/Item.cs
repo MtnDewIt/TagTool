@@ -6,8 +6,9 @@ using System.Collections.Generic;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "item", Tag = "item", Size = 0xB4, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
-    [TagStructure(Name = "item", Tag = "item", Size = 0x94, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
-    [TagStructure(Name = "item", Tag = "item", Size = 0xBC, MinVersion = CacheVersion.HaloReach)]
+    [TagStructure(Name = "item", Tag = "item", Size = 0x94, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
+    [TagStructure(Name = "item", Tag = "item", Size = 0xBC, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "item", Tag = "item", Size = 0x9C, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
     public class Item : GameObject
     {
         public ItemDefinitionFlags ItemFlags;

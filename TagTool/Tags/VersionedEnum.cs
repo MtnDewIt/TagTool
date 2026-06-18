@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Globalization;
+using System.Linq;
+using System.Numerics;
 using TagTool.Cache;
 using TagTool.Common;
 
@@ -62,48 +65,92 @@ namespace TagTool.Tags
             throw new ArgumentOutOfRangeException(nameof(enumValue));
         }
 
-        public static IFlagBits ImportFlags(Type enumType, uint value, CacheVersion version, CachePlatform platform)
+        public static bool TryParse(TagEnumInfo info, string value, out object result)
         {
-            var info = TagEnum.GetInfo(enumType, version, platform);
-            if (!info.Attribute.IsVersioned)
-                throw new InvalidOperationException("Cannot import to an non-versioned enum.");
+            result = null;
 
-            var flagBits = (IFlagBits)Activator.CreateInstance(typeof(FlagBits<>).MakeGenericType(enumType));
+            if (string.IsNullOrWhiteSpace(value) || !info.IsVersioned)
+                return false;
 
-            var members = TagEnum.GetMemberEnumerable(info).Members;
-
-            for (int i = 0; i < members.Count; i++)
+            NumberStyles style = NumberStyles.Integer;
+            string integerString = value;
+            if (value.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
             {
-                uint mask = 1u << i;
-                if ((value & mask) != 0)
-                {
-                    value &= ~mask;
-                    flagBits.SetBit((Enum)members[i].Value, true);
-                }
+                integerString = value[2..];
+                style = NumberStyles.HexNumber;
             }
 
-            if (value != 0)
-                throw new ArgumentOutOfRangeException(nameof(value), "Value had more bits set than enum members.");
+            var enumerable = TagEnum.GetMemberEnumerable(info);
+            var members = enumerable.VersionedMembers;
 
-            return flagBits;
+            if (info.IsFlags)
+                throw new InvalidOperationException("Versioned flags should be standard enums wrapped as BitFlags<TEnum>");
+            else
+            {
+                if (value.Split(',').Length > 1)
+                    return false;
+
+                if (int.TryParse(integerString, style, null, out int intValue))
+                {
+                    if (enumerable.Constants.Contains(intValue))
+                        result = Enum.ToObject(info.Type, intValue);
+
+                    else if (intValue >= 0 && intValue < members.Count)
+                        result = members[intValue].Value;
+                }
+                else if (Enum.TryParse(info.Type, value, true, out object enumValue)
+                    && VersionHasMember(info, enumValue))
+                {
+                    result = enumValue;
+                }
+
+                if (result is not null)
+                    return true;
+            }
+
+            return false;
         }
 
-        public static uint ExportFlags(Type enumType, IFlagBits flagBits, CacheVersion version, CachePlatform platform)
+        public static bool VersionHasMember(TagEnumInfo info, object enumValue)
         {
-            var info = TagEnum.GetInfo(enumType, version, platform);
-            if (!info.Attribute.IsVersioned)
-                throw new InvalidOperationException("Cannot import to an non-versioned enum.");
-    
-            var members = TagEnum.GetMemberEnumerable(info).Members;
+            var enumerable = TagEnum.GetMemberEnumerable(info);
+            var memberInfo = enumerable.VersionedMembers.FirstOrDefault(m => m.Value.Equals(enumValue));
 
-            uint value = 0;
-            for (int i = 0; i < members.Count; i++)
-            {
-                if (flagBits.TestBit((Enum)members[i].Value))
-                    value |= 1u << i;
-            }
+            if (memberInfo is not null || MemberIsConstant(info, enumValue))
+                return true;
 
-            return value;
+            return false;
+        }
+
+        public static bool MemberIsConstant(TagEnumInfo info, object enumValue)
+        {
+            var enumerable = TagEnum.GetMemberEnumerable(info);
+            if (enumerable.Constants.Contains((int)enumValue))
+                return true;
+
+            return false;
+        }
+
+        public static ulong ImportFlags(TagEnumInfo info, ulong value)
+        {
+            return BitUtils.Pdep(value, info.MemberMask);
+        }
+
+        public static ulong ExportFlags(TagEnumInfo info, ulong value)
+        {
+            return BitUtils.Pext(value, info.MemberMask);
+        }
+
+        public static bool ValidateFlagsForImport(TagEnumInfo info, ulong value)
+        {
+            int pop = BitOperations.PopCount(info.MemberMask);
+            ulong validMask = pop == 64 ? ulong.MaxValue : (1UL << pop) - 1;
+            return (value & ~validMask) == 0UL;
+        }
+
+        public static bool ValidateFlagsForExport(TagEnumInfo info, ulong value)
+        {
+            return (value & ~info.MemberMask) == 0UL;
         }
     }
 }

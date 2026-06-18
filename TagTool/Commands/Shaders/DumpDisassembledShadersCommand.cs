@@ -84,7 +84,7 @@ namespace TagTool.Commands.Shaders
                 {
                     if (tag.Name == null || tag.Name == "" || tag.Group.Tag != "rmdf")
                         continue;
-                    if (cache.Version == CacheVersion.HaloOnlineED && tag.Name.StartsWith("ms30\\"))
+                    if (CacheVersionDetection.IsEldewrito(cache.Version) && tag.Name.StartsWith("ms30\\"))
                         continue; // ignore ms30 in ms23, disassemble from ms30 directly instead
                     var pieces = tag.Name.Split('\\');
 

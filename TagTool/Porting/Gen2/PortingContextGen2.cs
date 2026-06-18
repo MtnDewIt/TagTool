@@ -163,12 +163,16 @@ namespace TagTool.Porting.Gen2
                 case Weapon weapon:
                 case Vehicle vehicle:
                 case Projectile projectile:
-                case CameraTrack track:
                 case DeviceMachine devicemachine:
                 case Equipment equipment:
                 case DeviceControl devicecontrol:
                 case Biped biped:
                     definition = ConvertObject(gen2definition, cacheStream);
+                    break;
+                case CameraTrack track:
+                    Tags.Definitions.CameraTrack newtrack = new Tags.Definitions.CameraTrack();
+                    AutoConverter.TranslateTagStructure(track, newtrack);
+                    definition = newtrack;
                     break;
                 case Effect effect:
                 case Particle particle:
@@ -228,7 +232,7 @@ namespace TagTool.Porting.Gen2
             switch (data)
             {
                 case SoundClass soundClass:
-                    return soundClass.ConvertSoundClass(BlamCache.Version);
+                    return ConvertSoundClass(soundClass);
                 default:
                     return base.ConvertData(cacheStream, blamCacheStream, data, definition, blamTagName);
             }

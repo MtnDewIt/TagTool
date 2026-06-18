@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace TagTool.Common
@@ -55,6 +57,55 @@ namespace TagTool.Common
         public override void WriteLine()
         {
             _writer.WriteLine(Ansi.Reset);
+        }
+    }
+
+    public static class AnsiConsole
+    {
+        public static void Initialize()
+        {
+            Console.OutputEncoding = Encoding.UTF8;
+            Console.SetOut(new AnsiWriter(Console.Out));
+            NativeMethods.EnableVirtualTerminalProcessing();
+        }
+
+        static class NativeMethods
+        {
+            const IntPtr INVALID_HANDLE_VALUE = -1;
+            const int STD_OUTPUT_HANDLE = -11;
+
+            [Flags]
+            private enum ConsoleOutputModes : uint
+            {
+                ENABLE_PROCESSED_OUTPUT = 0x0001,
+                ENABLE_WRAP_AT_EOL_OUTPUT = 0x0002,
+                ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004,
+                DISABLE_NEWLINE_AUTO_RETURN = 0x0008,
+                ENABLE_LVB_GRID_WORLDWIDE = 0x0010,
+            }
+
+            [DllImport("kernel32.dll")]
+            static extern bool SetConsoleMode(IntPtr hConsoleHandle, uint dwMode);
+
+            [DllImport("kernel32.dll", SetLastError = true)]
+            static extern bool GetConsoleMode(IntPtr hConsoleHandle, out uint lpMode);
+
+            [DllImport("kernel32.dll", SetLastError = true)]
+            static extern IntPtr GetStdHandle(int nStdHandle);
+
+            public static bool EnableVirtualTerminalProcessing()
+            {
+                IntPtr hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+                if (hOut == INVALID_HANDLE_VALUE)
+                    return false;
+
+                if (!GetConsoleMode(hOut, out uint mode))
+                    return false;
+
+                mode |= (uint)ConsoleOutputModes.ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+
+                return SetConsoleMode(hOut, mode);
+            }
         }
     }
 }

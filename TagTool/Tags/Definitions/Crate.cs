@@ -10,7 +10,7 @@ namespace TagTool.Tags.Definitions
         public CrateFlagsValue CrateFlags;
 
         [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
-        public byte[] Pad = new byte[2];
+        public byte[] Pad;
 
         public List<MetagameBucket> MetagameProperties;
         public int SelfDestructionTimer; // seconds

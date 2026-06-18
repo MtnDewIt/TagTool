@@ -349,7 +349,7 @@ namespace TagTool.Tags.Definitions
             [Flags]
             public enum DamageEffectSoundTypeFlags : ushort
             {
-                None = 1 << 0,
+                NoDamage = 1 << 0,
                 // headshots and assassinations
                 LethalInstantaneous = 1 << 1,
                 // excludes headshots and assassinations

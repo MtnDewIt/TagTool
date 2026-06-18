@@ -7,6 +7,7 @@ using TagTool.Commands.Common;
 using TagTool.Commands.Editing;
 using TagTool.Common;
 using System.IO;
+using TagTool.Common.Logging;
 
 namespace TagTool.Commands.Tags
 {
@@ -132,16 +133,24 @@ namespace TagTool.Commands.Tags
                 commandsToExecute.Add(args);
             }
 
-            List<CachedTag> tags = null;
+            List<CachedTag> tags = [];
 
             // if a file is given use that as the source for tags
             if (!string.IsNullOrWhiteSpace(filename))
             {
-                var tagsList = new List<CachedTag>();
-                foreach (var line in File.ReadAllLines(filename))
-                    tags.Add(Cache.TagCache.GetTag(line));
+                if (!File.Exists(filename))
+                    return new TagToolError(CommandError.FileNotFound, filename);
 
-                tags = tagsList;
+                foreach (var line in File.ReadAllLines(filename))
+                {
+                    if (!Cache.TagCache.TryGetTag(line, out CachedTag tag))
+                        return new TagToolError(CommandError.TagInvalid, line);
+
+                    if (!tag.IsInGroup(groupTag))
+                        Log.Info($"Tag \"{tag}\" is not in group \"{groupTag}\". Skipping...");
+                    else
+                        tags.Add(tag);
+                }
             }
             else
             {
@@ -182,12 +191,20 @@ namespace TagTool.Commands.Tags
                 {
                     var currentCommand = ContextStack.Context.GetCommand(commandToExecute[0]);
 
-                    if (currentCommand != null)
-                        currentCommand.Execute(commandToExecute.Skip(1).ToList());
-                    else
+                    var result = currentCommand is null
+                        ? new TagToolError(CommandError.CmdNotFound, commandToExecute[0])
+                        : currentCommand.Execute([.. commandToExecute.Skip(1)]);
+
+                    if (result is TagToolError error)
                     {
-                        ContextReturn(rootContext);
-                        return new TagToolError(CommandError.CustomError, "The command to execute could not be found... You may have made a typo.");
+                        if ((CommandRunner.Current?.SuppressErrors ?? true)
+                            && error.Error != CommandError.CmdNotFound)
+                            Log.Error(error.Message);
+                        else
+                        {
+                            ContextReturn(rootContext);
+                            return result;
+                        }
                     }
                 }
 

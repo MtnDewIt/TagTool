@@ -41,10 +41,10 @@ namespace TagTool.Commands.RenderMethods
                 Definition.ShaderProperties[0].Template == null)
                 return new TagToolError(CommandError.CustomError, "Invalid shader properties.");
 
-            string parameterName = args[0];
+            string parameterName = args[0].ToLower();
 
             ShaderFunctionHelper.ParameterType parameterType;
-            if (!Enum.TryParse(args[1], out parameterType))
+            if (!Enum.TryParse(args[1], true, out parameterType))
                 return new TagToolError(CommandError.ArgInvalid, $"\"{args[1]}\"");
             if (parameterType == ShaderFunctionHelper.ParameterType.Bool || parameterType == ShaderFunctionHelper.ParameterType.Int)
                 return new TagToolError(CommandError.ArgInvalid, $"\"{args[1]}\"");

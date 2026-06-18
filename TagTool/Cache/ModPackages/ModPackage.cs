@@ -50,8 +50,8 @@ namespace TagTool.Cache
 
         public int GetTagCacheCount() => TagCacheCount;
 
-        public CacheVersion PackageVersion = CacheVersion.HaloOnlineED;
-        public CachePlatform PackagePlatform = CachePlatform.Original;
+        private CacheVersion PackageVersion = CacheVersion.HaloOnlineED;
+        private CachePlatform PackagePlatform = CachePlatform.Original;
 
         ~ModPackage()
         {

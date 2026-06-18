@@ -729,7 +729,7 @@ namespace TagTool.Tags.Definitions
                 public short ScenarioCubemapIndex;
                 public short CubemapBitmapIndex;
                 [TagField(MinVersion = CacheVersion.HaloReach)]
-                [TagField(Version = CacheVersion.HaloOnlineED)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnlineED_END)]
                 public List<CubemapReferencePointsBlock> ReferencePoints;
 
                 [TagStructure(Size = 0x10)]

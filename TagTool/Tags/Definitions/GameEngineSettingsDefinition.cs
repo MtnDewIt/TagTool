@@ -7,23 +7,43 @@ using static TagTool.Tags.TagFieldFlags;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "game_engine_settings_definition", Tag = "wezr", Size = 0x88, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "game_engine_settings_definition", Tag = "wezr", Size = 0x8C, MinVersion = CacheVersion.HaloOnlineED)]
+    [TagStructure(Name = "game_engine_settings_definition", Tag = "wezr", Size = 0x8C, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Name = "game_engine_settings_definition", Tag = "wezr", Size = 0x40, MinVersion = CacheVersion.HaloReach)]
     public class GameEngineSettingsDefinition : TagStructure
 	{
         public FlagsValue Flags;
         public List<TraitProfile> TraitProfiles;
+
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<SlayerVariant> SlayerVariants;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<OddballVariant> OddballVariants;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<CaptureTheFlagVariant> CaptureTheFlagVariants;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<AssaultVariant> AssaultVariants;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<InfectionVariant> InfectionVariants;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<KingOfTheHillVariant> KingOfTheHillVariants;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<TerritoriesVariant> TerritoriesVariants;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<JuggernautVariant> JuggernautVariants;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<VipVariant> VipVariants;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<AiTraitProfile> AiTraitProfiles;
+
         public List<SandboxEditorVariant> SandboxEditorVariants;
 
-        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<SurvivalVariant> SurvivalVariants;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<CampaignVariant> CampaignVariants;
+
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown2;
 
         [Flags]
@@ -31,6 +51,13 @@ namespace TagTool.Tags.Definitions
         {
             None,
             Unused = 1 << 0
+        }
+
+        public enum ToggleValueReach : sbyte
+        {
+            Unchanged,
+            Disabled,
+            Enabled
         }
 
         [TagStructure(Size = 0x40)]
@@ -44,15 +71,34 @@ namespace TagTool.Tags.Definitions
             public List<AppearanceBlock> Appearance;
             public List<Sensor> Sensors;
 
-            [TagStructure(Size = 0x8)]
+            [TagStructure(Size = 0x8, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagStructure(Size = 0xC, MinVersion = CacheVersion.HaloReach)]
             public class ShieldsAndHealthBlock : TagStructure
 			{
                 public DamageResistanceValue DamageResistance;
+
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public HealthMultiplierValue HealthMultiplier;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public HealthRechargeRateValue HealthRechargeRate;
+
                 public ShieldMultiplierValue ShieldMultiplier;
                 public ShieldRechargeRateValue ShieldRechargeRate;
+
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public ShieldRechargeRate2Value ShieldRechargeRate2;
+
                 public HeadshotImmunityValue HeadshotImmunity;
                 public ShieldVampirismValue ShieldVampirism;
+
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public AssassinationImmunityValue AssassinationImmunity;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public ToggleValueReach Deathless;
+
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public sbyte Unknown;
+
                 public sbyte Unknown2;
                 public sbyte Unknown3;
 
@@ -113,19 +159,107 @@ namespace TagTool.Tags.Definitions
                     _50,
                     _100
                 }
+
+                public enum HealthMultiplierValue : sbyte
+                {
+                    Unchanged,
+                    _0,
+                    _100,
+                    _150,
+                    _200,
+                    _300,
+                    _400
+                }
+
+                public enum HealthRechargeRateValue : sbyte
+                {
+                    Unchanged,
+                    _neg25,
+                    _neg10,
+                    _neg5,
+                    _0,
+                    _10,
+                    _25,
+                    _50,
+                    _75,
+                    _90,
+                    _100,
+                    _110,
+                    _125,
+                    _150,
+                    _200
+                }
+
+                public enum ShieldRechargeRate2Value : sbyte
+                {
+                    Unchanged,
+                    _neg25,
+                    _neg10,
+                    _neg5,
+                    _0,
+                    _10,
+                    _25,
+                    _50,
+                    _75,
+                    _90,
+                    _100,
+                    _110,
+                    _125,
+                    _150,
+                    _200
+                }
+
+                public enum AssassinationImmunityValue : sbyte
+                {
+                    Unchanged,
+                    Enabled,
+                    Disabled
+                }
+
             }
 
-            [TagStructure(Size = 0x10)]
+            [TagStructure(Size = 0x10, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagStructure(Size = 0x18, MinVersion = CacheVersion.HaloReach)]
             public class WeaponsAndDamageBlock : TagStructure
 			{
                 public DamageModifierValue DamageModifier;
+
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public DamageModifierValue MeleeDamageModifier;
+
                 public GrenadeRegenerationValue GrenadeRegeneration;
                 public WeaponPickupValue WeaponPickup;
+
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public GrenadeCountValueReach GrenadeCountReach;
+
                 public InfiniteAmmoValue InfiniteAmmo;
+
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public ToggleValueReach EquipmentUsage;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public ToggleValueReach EquipmentDrop;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public ToggleValueReach InfiniteEquipment;
+
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public sbyte UnknownReach0;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public sbyte UnknownReach1;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public sbyte UnknownReach2;
+
                 public StringId PrimaryWeapon;
                 public StringId SecondaryWeapon;
+
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public StringId Equipment;
+
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public GrenadeCountValue GrenadeCount;
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public sbyte Unknown;
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public sbyte Unknown2;
 
                 public enum DamageModifierValue : sbyte
@@ -172,15 +306,41 @@ namespace TagTool.Tags.Definitions
                     MapDefault,
                     None
                 }
+
+                public enum GrenadeCountValueReach : sbyte
+                {
+                    Unchanged,
+                    MapDefault,
+                    _1_Frag,
+                    _2_Frag,
+                    _3_Frag,
+                    _4_Frag,
+                    _1_Plasma,
+                    _2_Plasma,
+                    _3_Plasma,
+                    _4_Plasma,
+                    _1xEach,
+                    _2xEach,
+                    _3xEach,
+                    _4xEach,
+                    None
+                }
             }
 
-            [TagStructure(Size = 0x4)]
+            [TagStructure(Size = 0x4, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagStructure(Size = 0x8, MinVersion = CacheVersion.HaloReach)]
             public class MovementBlock : TagStructure
 			{
                 public PlayerSpeedValue PlayerSpeed;
                 public PlayerGravityValue PlayerGravity;
                 public VehicleUseValue VehicleUse;
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public sbyte Unknown;
+
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public ToggleValueReach DoubleJump;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public int JumpHeight;
 
                 public enum PlayerSpeedValue : sbyte
                 {
@@ -216,13 +376,25 @@ namespace TagTool.Tags.Definitions
                 }
             }
 
-            [TagStructure(Size = 0x4)]
+            [TagStructure(Size = 0x4, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagStructure(Size = 0x8, MinVersion = CacheVersion.HaloReach)]
             public class AppearanceBlock : TagStructure
 			{
                 public ActiveCamoValue ActiveCamo;
                 public WaypointValue Waypoint;
+
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public VisibleNameValue VisibleName;
+
                 public AuraValue Aura;
                 public ForcedColorValue ForcedColor;
+
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public sbyte UnknownReach0;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public sbyte UnknownReach1;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public sbyte UnknownReach2;
 
                 public enum ActiveCamoValue : sbyte
                 {
@@ -267,13 +439,32 @@ namespace TagTool.Tags.Definitions
                     Zombie,
                     PinkUnused
                 }
+
+                public enum VisibleNameValue : sbyte
+                {
+                    Unchanged,
+                    None,
+                    VisibleToAllies,
+                    VisibleToEveryone
+                }
+
             }
 
-            [TagStructure(Size = 0x8)]
+            [TagStructure(Size = 0x8, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagStructure(Size = 0x4, MinVersion = CacheVersion.HaloReach)]
             public class Sensor : TagStructure
 			{
+                [TagField(EnumType = typeof(int), MaxVersion = CacheVersion.HaloOnline700123)]
+                [TagField(EnumType = typeof(sbyte), MinVersion = CacheVersion.HaloReach)]
                 public MotionTrackerModeValue MotionTrackerMode;
+                [TagField(EnumType = typeof(int), MaxVersion = CacheVersion.HaloOnline700123)]
+                [TagField(EnumType = typeof(sbyte), MinVersion = CacheVersion.HaloReach)]
                 public MotionTrackerRangeValue MotionTrackerRange;
+
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public ToggleValueReach DirectionalDamageIndicator;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public sbyte UnknownReach;
 
                 public enum MotionTrackerModeValue : int
                 {
@@ -296,13 +487,15 @@ namespace TagTool.Tags.Definitions
                     _150m
                 }
             }
+
         }
 
         [TagStructure(Size = 0x38, MaxVersion = CacheVersion.Halo3ODST)]
-        [TagStructure(Size = 0x58, MinVersion = CacheVersion.HaloOnlineED)]
+        [TagStructure(Size = 0x58, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x50, MinVersion = CacheVersion.HaloReach)]
         public abstract class BaseVariant : TagStructure
 		{
-            [TagField(Flags = Label, Length = 32, MinVersion = CacheVersion.HaloOnlineED)]
+            [TagField(Flags = Label, Length = 32, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
             public string NameAscii;
             [TagField(Flags = Label)]
             public StringId Name;
@@ -312,14 +505,34 @@ namespace TagTool.Tags.Definitions
             public List<SocialSetting> SocialSettings;
             public List<MapOverride> MapOverrides;
 
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public List<TeamOptions> Teams;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public List<LoadoutOptions> Loadouts;
+
             [TagStructure(Size = 0x8)]
             public class GeneralSetting : TagStructure
 			{
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public FlagsValue Flags;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public FlagsValueReach FlagsReach;
+
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public sbyte EarlyVictoryWinCountReach;
+
                 public sbyte TimeLimit;
                 public sbyte NumberOfRounds;
+
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public sbyte EarlyVictoryWinCount;
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public RoundResetsValue RoundResets;
+
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public short SuddenDeath;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public short GracePeriod;
 
                 [Flags]
                 public enum FlagsValue : int
@@ -327,6 +540,15 @@ namespace TagTool.Tags.Definitions
                     None,
                     TeamsEnabled = 1 << 0,
                     SpectatingEnabled = 1 << 1
+                }
+
+                [Flags]
+                public enum FlagsValueReach : sbyte
+                {
+                    TeamsEnabled = 1 << 0,
+                    RoundResetPlayers = 1 << 1,
+                    RoundResetMap = 1 << 2,
+                    PerfectionEnabled = 1 << 3,
                 }
 
                 public enum RoundResetsValue : sbyte
@@ -338,17 +560,18 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x10, MaxVersion = CacheVersion.Halo3ODST)]
-            [TagStructure(Size = 0x14, MinVersion = CacheVersion.HaloOnlineED)]
+            [TagStructure(Size = 0x14, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloReach)]
             public class RespawnSetting : TagStructure
             {
                 [TagField(MaxVersion = CacheVersion.Halo3ODST)]
                 public RespawnFlagsH3 FlagsH3;
-                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public RespawnFlags Flags;
                 public sbyte LivesPerRound;
                 public sbyte SharedTeamLives;
 
-                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                 public byte Unknown;
 
                 public byte RespawnTime;
@@ -356,17 +579,23 @@ namespace TagTool.Tags.Definitions
                 public byte BetrayalPenalty;
                 public byte RespawnTimeGrowth;
 
-                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                 public sbyte Unknown1;
-                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                 public sbyte Unknown2;
-                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                 public sbyte Unknown3;
 
                 public StringId RespawnTraitProfile;
+
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public sbyte LoadoutSelectionTime;
+
                 public sbyte RespawnTraitDuration;
                 public sbyte Unknown4;
                 public sbyte Unknown5;
+
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public sbyte Unknown6;
 
                 [Flags]
@@ -395,7 +624,7 @@ namespace TagTool.Tags.Definitions
 			{
                 [TagField(MaxVersion = CacheVersion.Halo3ODST)]
                 public SocialFlagsH3 FlagsH3;
-                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
                 public SocialFlags Flags;
 
                 [Flags]
@@ -427,10 +656,13 @@ namespace TagTool.Tags.Definitions
                 }
             }
 
-            [TagStructure(Size = 0x20)]
+            [TagStructure(Size = 0x20, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagStructure(Size = 0x1C, MinVersion = CacheVersion.HaloReach)]
             public class MapOverride : TagStructure
 			{
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public FlagsValue Flags;
+
                 public StringId BasePlayerTraitProfile;
                 public StringId WeaponSet;
                 public StringId VehicleSet;
@@ -440,7 +672,12 @@ namespace TagTool.Tags.Definitions
                 public sbyte OvershieldTraitDuration;
                 public sbyte ActiveCamoTraitDuration;
                 public sbyte CustomPowerupTraitDuration;
+
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public sbyte Unknown;
+
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public MapOverrideOptionsFlagsReach FlagsReach;
 
                 [Flags]
                 public enum FlagsValue : int
@@ -448,6 +685,17 @@ namespace TagTool.Tags.Definitions
                     None,
                     GrenadesOnMap,
                     IndestructableVehicles
+                }
+
+                [Flags]
+                public enum MapOverrideOptionsFlagsReach : sbyte
+                {
+                    GrenadesOnMap = 1 << 0,
+                    ShortcutsOnMap = 1 << 1,
+                    EquipmentOnMap = 1 << 2,
+                    PowerupsOnMap = 1 << 3,
+                    TurretsOnMap = 1 << 4,
+                    IndestructibleVehicles = 1 << 5,
                 }
             }
         }
@@ -920,7 +1168,8 @@ namespace TagTool.Tags.Definitions
             public enum FlagsValue : int
             {
                 None,
-                OpenChannelVoiceEnabled = 1 << 0
+                OpenChannelVoiceEnabled = 1 << 0,
+                Unknown = 1 << 1,
             }
 
             public enum EditModeValue : short
@@ -928,6 +1177,317 @@ namespace TagTool.Tags.Definitions
                 Everyone,
                 LeaderOnly
             }
+        }
+
+        [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloReach)]
+        public class AiTraitProfile
+        {
+            public StringId Name;
+            public AiVisionValue Vision;
+            public AiHearingValue Hearing;
+            public AiLuckValue Luck;
+            public AiShootinessValue Shootiness;
+            public AiGrenadesValue Grenades;
+            public ToggleValueReach EquipmentDrop;
+            public ToggleValueReach AssassinationImmunity;
+            public ToggleValueReach HeadshotImmunity;
+            public AiDamageResistanceValue DamageResistance;
+            public AiDamageModifierValue DamageModifier;
+            public sbyte Unknown0;
+            public sbyte Unknown1;
+
+            public enum AiVisionValue : sbyte
+            {
+                Unchanged,
+                Normal,
+                Blind,
+                Nearsighted,
+                EagleEye
+            }
+
+            public enum AiHearingValue : sbyte
+            {
+                Unchanged,
+                Normal,
+                Deaf,
+                Sharp
+            }
+
+            public enum AiShootinessValue : sbyte
+            {
+                Unchanged,
+                Normal,
+                Marksman,
+                TriggerHappy
+            }
+
+            public enum AiLuckValue : sbyte
+            {
+                Unchanged,
+                Normal,
+                Unlucky,
+                Lucky,
+                Leprechaun
+            }
+
+            public enum AiGrenadesValue : sbyte
+            {
+                Unchanged,
+                Normal,
+                None,
+                Catch
+            }
+
+            public enum AiDamageResistanceValue : sbyte
+            {
+                Unchanged,
+                _10,
+                _50,
+                _90,
+                _100,
+                _110,
+                _150,
+                _200,
+                _300,
+                _500,
+                _1000,
+                _2000,
+                Invulnerable
+            }
+
+            public enum AiDamageModifierValue : sbyte
+            {
+                Unchanged,
+                _0,
+                _25,
+                _50,
+                _75,
+                _90,
+                _100,
+                _110,
+                _150,
+                _200,
+                _300,
+                InstantKill
+            }
+        }
+
+        [TagStructure(Size = 0xA4)]
+        public class TeamOptions : TagStructure
+        {
+            public TeamOptionsModelOverrideType ModelOverrideType;
+            public TeamOptionsDesignatorSwitchType DesignatorSwitchType;
+            [TagField(Length = 2, Flags = TagTool.Tags.TagFieldFlags.Padding)]
+            public byte[] Pad;
+            [TagField(Length = 8)]
+            public GameEngineTeamOptionsTeamBlock[] Teams;
+
+            public enum TeamOptionsModelOverrideType : sbyte
+            {
+                NonePlayerChoice,
+                ForceSpartan,
+                ForceElite,
+                SetByTeam,
+                SetByDesignator,
+            }
+
+            public enum TeamOptionsDesignatorSwitchType : sbyte
+            {
+                None,
+                Random,
+                Rotate,
+            }
+
+            [TagStructure(Size = 0x14)]
+            public class GameEngineTeamOptionsTeamBlock : TagStructure
+            {
+                public GameEngineTeamOptionsTeamFlags Flags;
+                public MultiplayerTeamDesignator InitialTeamDesignator;
+                public PlayerModelChoice ModelOverride;
+                public sbyte NumberOfFireteams;
+                public StringId Description;
+                public ArgbColor ColorOverride;
+                public ArgbColor UiTextTintColorOverride;
+                public ArgbColor UiBitmapTintColorOverride;
+
+                [Flags]
+                public enum GameEngineTeamOptionsTeamFlags : byte
+                {
+                    Enabled = 1 << 0,
+                    OverrideColor = 1 << 1,
+                    OverrideUiTextTintColor = 1 << 2,
+                    OverrideUiBitmapTintColor = 1 << 3,
+                }
+
+                public enum MultiplayerTeamDesignator : sbyte
+                {
+                    Defender,
+                    Attacker,
+                    ThirdParty,
+                    FourthParty,
+                    FifthParty,
+                    SixthParty,
+                    SeventhParty,
+                    EighthParty,
+                    Neutral,
+                }
+
+                public enum PlayerModelChoice : sbyte
+                {
+                    Spartan,
+                    Elite,
+                }
+            }
+        }
+
+        [TagStructure(Size = 0x10)]
+        public class LoadoutOptions : TagStructure
+        {
+            public LoadoutFlagsDefinition Flags;
+            [TagField(Length = 3, Flags = TagTool.Tags.TagFieldFlags.Padding)]
+            public byte[] Dlvkjser;
+            public List<LoadoutPaletteEntry> LoadoutPalettes;
+
+            [Flags]
+            public enum LoadoutFlagsDefinition : byte
+            {
+                SpartanLoadoutsEnabled = 1 << 0,
+                EliteLoadoutsEnabled = 1 << 1,
+            }
+
+            [TagStructure(Size = 0x4)]
+            public class LoadoutPaletteEntry : TagStructure
+            {
+                public StringId PaletteName;
+            }
+        }
+
+        [TagStructure(Size = 0x68, MinVersion = CacheVersion.HaloReach)]
+        public class SurvivalVariant : BaseVariant
+        {
+            public SurvivalVariantFlags Flags;
+
+            [TagField(EnumType = typeof(sbyte))]
+            public GameDifficulty GameDifficulty;
+
+            [TagField(Length = 2, Flags = TagTool.Tags.TagFieldFlags.Padding)]
+            public byte[] Sdfhjren;
+
+            public sbyte SetCount;
+            public sbyte BonusLivesAwarded;
+            public short BonusTarget;
+            public short SpartanLivesOnEliteDeath;
+            public short ExtraLifeScoreTarget;
+            public short SharedTeamLifeCount;
+            public short EliteLifeCount;
+            public short MaximumLives;
+            public short GeneratorCount;
+            public StringId SpartanPlayerTraits;
+            public StringId ElitePlayerTraits;
+            public StringId AiTraits;
+            public List<RespawnSetting> EliteRespawnOptions;
+            public List<SurvivalSetProperties> SetProperties;
+            public List<SurvivalRoundProperties> RoundProperties;
+            public SurvivalBonusWavePropertiesStruct BonusRoundProperties;
+            public List<SurvivalCustomSkull> CustomSkulls;
+
+            [TagStructure(Size = 0x4)]
+            public class SurvivalSetProperties : TagStructure
+            {
+                public SkullFlags Skulls;
+            }
+
+            [TagStructure(Size = 0x34)]
+            public class SurvivalRoundProperties : TagStructure
+            {
+                public SkullFlags Skulls;
+                public SurvivalWavePropertiesStruct InitialWaves;
+                public SurvivalWavePropertiesStruct PrimaryWaves;
+                public SurvivalWavePropertiesStruct BossWaves;
+            }
+
+            [TagStructure(Size = 0x10)]
+            public class SurvivalWavePropertiesStruct : TagStructure
+            {
+                public SurvivalWavePropertiesFlags Flags;
+                public SurvivalWaveSquadAdvanceType WaveSelectionType;
+                [TagField(Length = 2, Flags = TagTool.Tags.TagFieldFlags.Padding)]
+                public byte[] Vjknmfen;
+                public List<SurvivalWaveSquadBlock> WaveSquads;
+
+                [Flags]
+                public enum SurvivalWavePropertiesFlags : byte
+                {
+                    DeliveredViaDropship = 1 << 0,
+                }
+
+                public enum SurvivalWaveSquadAdvanceType : sbyte
+                {
+                    Random,
+                    Sequence,
+                }
+
+                [TagStructure(Size = 0x4)]
+                public class SurvivalWaveSquadBlock : TagStructure
+                {
+                    public StringId SquadType;
+                }
+            }
+
+            [TagStructure(Size = 0x18)]
+            public class SurvivalBonusWavePropertiesStruct : TagStructure
+            {
+                public SkullFlags Skulls;
+                public short Duration;
+                [TagField(Length = 2, Flags = TagTool.Tags.TagFieldFlags.Padding)]
+                public byte[] Clkjsdf;
+                public SurvivalWavePropertiesStruct BaseProperties;
+            }
+
+            [TagStructure(Size = 0xC)]
+            public class SurvivalCustomSkull : TagStructure
+            {
+                public StringId SpartanPlayerTraits;
+                public StringId ElitePlayerTraits;
+                public StringId AiTraits;
+            }
+
+            [Flags]
+            public enum SurvivalVariantFlags : byte
+            {
+                EnableScenarioHazards = 1 << 0,
+                GeneratorDefendAll = 1 << 1,
+                GeneratorRandomSpawn = 1 << 2,
+                EnableWeaponDrops = 1 << 3,
+                EnableAmmoCrates = 1 << 4,
+            }
+
+            [Flags]
+            public enum SkullFlags : uint
+            {
+                SkullIron = 1 << 0,
+                SkullBlackEye = 1 << 1,
+                SkullToughLuck = 1 << 2,
+                SkullCatch = 1 << 3,
+                SkullFog = 1 << 4,
+                SkullFamine = 1 << 5,
+                SkullThunderstorm = 1 << 6,
+                SkullTilt = 1 << 7,
+                SkullMythic = 1 << 8,
+                SkullAssassin = 1 << 9,
+                SkullBlind = 1 << 10,
+                SkullSuperman = 1 << 11,
+                SkullBirthdayParty = 1 << 12,
+                SkullDaddy = 1 << 13,
+                SkullRed = 1 << 14,
+                SkullYellow = 1 << 15,
+                SkullBlue = 1 << 16,
+            }
+        }
+
+        [TagStructure(Size = 0x0, MinVersion = CacheVersion.HaloReach)]
+        public class CampaignVariant : BaseVariant
+        {
         }
     }
 }

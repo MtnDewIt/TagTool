@@ -103,17 +103,15 @@ namespace TagTool.Lighting
                 dds.Write(writer);
         }
 
-        public void ImportIntoLbsp(GameCacheHaloOnlineBase cache, Stream stream, ScenarioLightmapBspData Lbsp)
+        public void ImportIntoLbsp(GameCacheHaloOnlineBase cache, Stream stream, ScenarioLightmapBspData Lbsp, string tagName)
         {
-            var linearSHBitmap = cache.Deserialize<Bitmap>(stream, Lbsp.LightmapSHCoefficientsBitmap);
-            var intensityBitmap = cache.Deserialize<Bitmap>(stream, Lbsp.LightmapDominantLightDirectionBitmap);
-
             var linearSH = new BaseBitmap();
             linearSH.Type = BitmapType.Texture3D;
             linearSH.Data = LinearSH;
             linearSH.Width = Width;
             linearSH.Height = Height;
             linearSH.Depth = 8;
+            linearSH.Curve = BitmapImageCurve.Linear;
             linearSH.UpdateFormat(BitmapFormat.Dxt5);
 
             var intensity = new BaseBitmap();
@@ -122,25 +120,37 @@ namespace TagTool.Lighting
             intensity.Width = Width;
             intensity.Height = Height;
             intensity.Depth = 2;
+            intensity.Curve = BitmapImageCurve.Linear;
             intensity.UpdateFormat(BitmapFormat.Dxt5);
 
             Lbsp.CoefficientsMapScale = new Common.LuminanceScale[9];
             for (int i = 0; i < 5; i++)
                 Lbsp.CoefficientsMapScale[i] = new Common.LuminanceScale() { Scale = MaxLs[i] };
 
-            ImportBitmap(cache, stream, Lbsp.LightmapSHCoefficientsBitmap, linearSHBitmap, 0, linearSH);
-            ImportBitmap(cache, stream, Lbsp.LightmapDominantLightDirectionBitmap, intensityBitmap, 0, intensity);
+            Lbsp.LightmapSHCoefficientsBitmap = ImportBitmap(cache, stream, $"{tagName}_16f_lp_array_dxt5", linearSH);
+            Lbsp.LightmapDominantLightDirectionBitmap = ImportBitmap(cache, stream, $"{tagName}_16f_lp_array_intensity_dxt5", intensity);
         }
 
-        private static void ImportBitmap(GameCacheHaloOnlineBase cache, Stream stream, CachedTag tag, Bitmap bitmap, int imageIndex, BaseBitmap bitmapImport)
+        private static CachedTag ImportBitmap(GameCacheHaloOnlineBase cache, Stream stream, string tagName, BaseBitmap bitmapImport)
         {
             BitmapTextureInteropResource resource = BitmapUtils.CreateEmptyBitmapTextureInteropResource();
             resource.Texture.Definition.PrimaryResourceData = new TagData(bitmapImport.Data);
             resource.Texture.Definition.Bitmap = BitmapUtils.CreateBitmapTextureInteropDefinition(bitmapImport);
             var reference = cache.ResourceCache.CreateBitmapResource(resource);
-            bitmap.Images[imageIndex] = BitmapUtils.CreateBitmapImageFromResourceDefinition(resource.Texture.Definition.Bitmap);
-            bitmap.HardwareTextures[imageIndex] = reference;
+
+            Bitmap bitmap = new()
+            {
+                Flags = BitmapRuntimeFlags.UsingTagInteropAndTagResource,
+                Images = [BitmapUtils.CreateBitmapImageFromResourceDefinition(resource.Texture.Definition.Bitmap)],
+                HardwareTextures = [reference]
+            };
+
+            if (!cache.TagCache.TryGetTag<Bitmap>(tagName, out CachedTag tag))
+                tag = cache.TagCache.AllocateTag<Bitmap>(tagName);
+
             cache.Serialize(stream, tag, bitmap);
+
+            return tag;
         }
     }
 }

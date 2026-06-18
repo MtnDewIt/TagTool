@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using TagTool.Common;
 using TagTool.IO;
 
@@ -867,5 +868,16 @@ namespace TagTool.Tags
             }
         }
 
+        public override string ToString()
+        {
+            if (Data == null)
+                return "null";
+
+            StringBuilder sb = new();
+            for (int i = 0; i < Data.Length; i++)
+                sb.Append(((int)Data[i]).ToString("X2"));
+
+            return sb.ToString();
+        }
     }
 }

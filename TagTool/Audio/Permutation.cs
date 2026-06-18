@@ -23,7 +23,7 @@ namespace TagTool.Audio
 
         //Convert
         [TagField(Gen = CacheGeneration.Third, BuildType = CacheBuildType.ReleaseBuild)]
-        public short EncodedSkipFraction;
+        public ushort EncodedSkipFraction;
 
         [TagField(Gen = CacheGeneration.HaloOnline)]
         [TagField(BuildType = CacheBuildType.TagsBuild)]
@@ -108,7 +108,7 @@ namespace TagTool.Audio
     public class Gen2Permutation : TagStructure
     {
         public short Name;
-        public short EncodedSkipFraction;
+        public ushort EncodedSkipFraction;
         public sbyte EncodedGain; // dB
         public sbyte PermutationInfoIndex;
         public short LanguageNeutralTime; // ms

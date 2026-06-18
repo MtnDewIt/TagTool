@@ -8,7 +8,8 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "cinematic", Tag = "cine", Size = 0xB0 , MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "cinematic", Tag = "cine", Size = 0xB4, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
-    [TagStructure(Name = "cinematic", Tag = "cine", Size = 0xC4, MinVersion = CacheVersion.HaloReach)]
+    [TagStructure(Name = "cinematic", Tag = "cine", Size = 0xC4, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "cinematic", Tag = "cine", Size = 0xA4, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
     public class Cinematic : TagStructure
 	{
         // both these fields reference an index in the scenes block, eg bit 0 = scene 0
@@ -31,10 +32,19 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloReach, ValidTags = new[] { "citr" })]
         public CachedTag TransitionSettings;
 
+        [TagField(Platform = CachePlatform.Original)]
+        [TagField(Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3ODST)]
         public RealRgbColor FadeInColor;
+        [TagField(Platform = CachePlatform.Original)]
+        [TagField(Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3ODST)]
         public int FadeInTime;
+        [TagField(Platform = CachePlatform.Original)]
+        [TagField(Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3ODST)]
         public RealRgbColor FadeOutColor;
+        [TagField(Platform = CachePlatform.Original)]
+        [TagField(Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3ODST)]
         public int FadeOutTime;
+
         public CachedTag BinkMovie;
         public byte[] ImportScriptHeader;
         public List<TagReferenceBlock> CinematicScenes;

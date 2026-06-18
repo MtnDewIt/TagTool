@@ -134,6 +134,11 @@ namespace TagTool.Porting
                 if (result == null)
                     Log.Warning($"null tag allocated for reference \"{blamTag}\"");
             }
+            else if (blamTag.Name != null && blamTag.IsInGroup("bitm"))
+            {
+                if (CacheContext.TagCache.TryGetTag($"{blamTag}", out result))
+                    Log.Warning($"using existing bitmap \"{blamTag}\"");
+            }
 
             PortedTags[cacheKey] = result;
 
@@ -310,6 +315,11 @@ namespace TagTool.Porting
 
         protected virtual CachedTag GetFallbackTag(CachedTag blamTag)
         {
+            if(PortingConstants.DefaultTagNames.TryGetValue(blamTag.Group.Tag, out string defaultTagName))
+            {
+                CacheContext.TagCache.TryGetTag($"{defaultTagName}.{blamTag.Group.Tag}", out CachedTag result);
+                return result;
+            }
             return null;
         }
 

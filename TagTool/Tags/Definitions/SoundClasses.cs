@@ -35,7 +35,7 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public CacheMissModeODSTValue CacheMissModeODST;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public AccousticsFlagsValue BindToAccoustics;
+            public AcousticsFlagsValue BindToAcoustics;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public SuppressSpatializationFlagsValue SuppressSpatialization;
             [TagField(Length = 3, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.Halo3ODST)]
@@ -51,7 +51,7 @@ namespace TagTool.Tags.Definitions
             //
 
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public Bounds<float> DefaultDistanceBounds;
+            public Bounds<float> AttackBounds;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public Bounds<float> DistanceBounds;
             [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -71,7 +71,7 @@ namespace TagTool.Tags.Definitions
 
             public SoundClassDucking CutsceneDucking;
             public SoundClassDucking ScriptedDialogDucking;
-            public SoundClassDucking CortanaEffectDucking;
+            public SoundClassDucking CortanaChannelDucking;
 
             //
             // ODST unique part
@@ -83,7 +83,7 @@ namespace TagTool.Tags.Definitions
             public SoundClassDucking PdaDucking;
 
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float UnknownCortanaEffect;
+            public float CortanaChannelOcclusionFactor;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public SoundClassDucking BetweenRoundsDucking;
@@ -172,7 +172,7 @@ namespace TagTool.Tags.Definitions
             }
 
             [Flags]
-            public enum AccousticsFlagsValue : sbyte
+            public enum AcousticsFlagsValue : sbyte
             {
                Outside = (1 << 0),
                Inside = (1 << 1)

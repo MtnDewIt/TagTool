@@ -95,7 +95,7 @@ namespace TagTool.Audio
         /// 270 => right
         /// 
         /// </summary>
-        public FlagsValue Flags;
+        public GainOverrideFlagsValue GainOverrideFlags;
         public Angle Azimuth;
         public float PositionalGain;    // dB
         public float FirstPersonGain;    // dB
@@ -108,7 +108,7 @@ namespace TagTool.Audio
             DistanceB = 1 << 1,
             DistanceC = 1 << 2,
             DistanceD = 1 << 3,
-            Bit4 = 1 << 4,
+            DirectionalAttenuation = 1 << 4,
             Bit5 = 1 << 5,
             Bit6 = 1 << 6,
             Bit7 = 1 << 7,
@@ -139,7 +139,7 @@ namespace TagTool.Audio
         }
 
         [Flags]
-        public enum FlagsValue : int
+        public enum GainOverrideFlagsValue : int
         {
             None = 0,
             OverrideAzimuth = 1 << 0,

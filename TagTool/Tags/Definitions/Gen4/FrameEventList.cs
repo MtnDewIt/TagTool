@@ -10,9 +10,9 @@ namespace TagTool.Tags.Definitions.Gen4
     [TagStructure(Name = "frame_event_list", Tag = "frms", Size = 0x24)]
     public class FrameEventList : TagStructure
     {
-        public List<AnimationGraphSoundReferenceBlock> SoundReferencesAbcdcc;
-        public List<AnimationGraphEffectReferenceBlock> EffectReferencesAbcdcc;
-        public List<ImportAnimationEventBlock> FrameEventsAbcdcc;
+        public List<AnimationGraphSoundReferenceBlock> SoundReferences;
+        public List<AnimationGraphEffectReferenceBlock> EffectReferences;
+        public List<ImportAnimationEventBlock> FrameEvents;
         
         [TagStructure(Size = 0x28)]
         public class AnimationGraphSoundReferenceBlock : TagStructure

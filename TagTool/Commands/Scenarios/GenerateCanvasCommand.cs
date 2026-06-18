@@ -408,11 +408,7 @@ namespace TagTool.Commands.Scenarios
                                },
                                ClusterMappings = new List<ZoneSetPvsBlock.BspPvsBlock.BspSeamClusterMapping>() {
                                    new ZoneSetPvsBlock.BspPvsBlock.BspSeamClusterMapping() {
-                                       Clusters = new List<ZoneSetPvsBlock.BspPvsBlock.BspSeamClusterMapping.ClusterReference>() {
-                                           new ZoneSetPvsBlock.BspPvsBlock.BspSeamClusterMapping.ClusterReference() {
-                                               ClusterIndex = 0
-                                           }
-                                       }
+                                       Clusters = [0]
                                    }
                                }
                            },
@@ -549,6 +545,8 @@ namespace TagTool.Commands.Scenarios
     {
         public class WorldParameters
         {
+            public RealVector2d Center = new RealVector2d(0.0f, 0.0f);
+            public RealVector2d Extents = new RealVector2d(500.0f, 500.0f);
             public CachedTag Shader;
             public float Tesselation;
             public float Opacity;
@@ -572,12 +570,15 @@ namespace TagTool.Commands.Scenarios
                 RuntimeGlobalMaterialIndex = 0
             });
 
+            if (parameters.Extents == new RealVector2d(0.0f, 0.0f))
+                parameters.Extents = new RealVector2d(500.0f, 500.0f);
+
             float cellSize = parameters.CellSize;
-            int xCells = (int)Math.Ceiling(sbsp.WorldBoundsX.Length / cellSize);
-            int yCells = (int)Math.Ceiling(sbsp.WorldBoundsZ.Length / cellSize);
+            int xCells = (int)Math.Ceiling((parameters.Extents.I * 2) / cellSize);
+            int yCells = (int)Math.Ceiling((parameters.Extents.J * 2) / cellSize);
             GenerateGridMesh(xCells, yCells, cellSize, out WorldVertex[] worldVertices, out ushort[] indices);
 
-            var origin = new RealPoint3d(-sbsp.WorldBoundsX.Length / 2, -sbsp.WorldBoundsZ.Length / 2, parameters.Z);
+            var origin = new RealPoint3d(parameters.Center.I - parameters.Extents.I, parameters.Center.J - parameters.Extents.J, parameters.Z);
             foreach (ref WorldVertex v in worldVertices.AsSpan())
                 v.Position = new RealQuaternion(v.Position.I + origin.X, v.Position.J + origin.Y, v.Position.K + origin.Z);
 
@@ -656,10 +657,15 @@ namespace TagTool.Commands.Scenarios
                 RuntimeGlobalMaterialIndex = 0
             });
 
-            float cellSize = parameters.CellSize;
-            GenerateGridMesh(1, 1, cellSize, out WorldVertex[] worldVertices, out ushort[] indices);
+            if (parameters.Extents == new RealVector2d(0.0f, 0.0f))
+                parameters.Extents = new RealVector2d(500.0f, 500.0f);
 
-            var origin = new RealPoint3d(-250, -250, parameters.Z);
+            float cellSize = parameters.CellSize;
+            int xCells = (int)Math.Ceiling((parameters.Extents.I * 2)/ cellSize);
+            int yCells = (int)Math.Ceiling((parameters.Extents.J * 2)/ cellSize);
+            GenerateGridMesh(xCells, yCells, cellSize, out WorldVertex[] worldVertices, out ushort[] indices);
+
+            var origin = new RealPoint3d(parameters.Center.I - parameters.Extents.I, parameters.Center.J - parameters.Extents.J, parameters.Z);
             foreach (ref WorldVertex v in worldVertices.AsSpan())
                 v.Position = new RealQuaternion(v.Position.I + origin.X, v.Position.J + origin.Y, v.Position.K + origin.Z);
 
@@ -669,7 +675,7 @@ namespace TagTool.Commands.Scenarios
                 TransparentSortingIndex = -1,
                 FirstIndex = 0,
                 IndexCount = indices.Length,
-
+                
             };
             var mesh = new Mesh()
             {

@@ -77,42 +77,18 @@ namespace TagTool.Cache
                     throw new Exception("Invalid file passed to GameCache constructor");
             }
 
-            switch (estimatedVersion)
+            switch (CacheVersionDetection.GetGeneration(estimatedVersion))
             {
-                case CacheVersion.HaloXbox:
-                case CacheVersion.HaloPC:
-                case CacheVersion.HaloCustomEdition:
+                case CacheGeneration.First:
                     return new GameCacheGen1(map, file);
 
-                case CacheVersion.Halo2Alpha:
-                case CacheVersion.Halo2PC:
-                case CacheVersion.Halo2Xbox:
-                case CacheVersion.Halo2Beta:
+                case CacheGeneration.Second:
                     return new GameCacheGen2(map, file);
 
-                case CacheVersion.Halo3Beta:
-                case CacheVersion.Halo3Retail:
-                case CacheVersion.Halo3ODST:
-                case CacheVersion.HaloReach:
+                case CacheGeneration.Third:
                     return new GameCacheGen3(map, file);
 
-                case CacheVersion.HaloOnlineED:
-                case CacheVersion.HaloOnline106708:
-                case CacheVersion.HaloOnline235640:
-                case CacheVersion.HaloOnline301003:
-                case CacheVersion.HaloOnline327043:
-                case CacheVersion.HaloOnline372731:
-                case CacheVersion.HaloOnline416097:
-                case CacheVersion.HaloOnline430475:
-                case CacheVersion.HaloOnline454665:
-                case CacheVersion.HaloOnline449175:
-                case CacheVersion.HaloOnline498295:
-                case CacheVersion.HaloOnline530605:
-                case CacheVersion.HaloOnline532911:
-                case CacheVersion.HaloOnline554482:
-                case CacheVersion.HaloOnline571627:
-                case CacheVersion.HaloOnline604673:
-                case CacheVersion.HaloOnline700123:
+                case CacheGeneration.HaloOnline:
                     {
                         var directory = file.Directory.FullName;
                         var tagsPath = Path.Combine(directory, "tags.dat");
@@ -124,8 +100,7 @@ namespace TagTool.Cache
                         return new GameCacheHaloOnline(tagsFile.Directory);
                     }
 
-                case CacheVersion.Halo4:
-                case CacheVersion.H2AMP:
+                case CacheGeneration.Fourth:
                     return new GameCacheGen4(map, file);
             }
 

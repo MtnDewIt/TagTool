@@ -16,7 +16,7 @@ namespace TagTool.Scripting.CSharp
             {
                 string fullPath = assemblyNameOrPath.StartsWith("./")
                     ? Path.Combine(sourceDirectory.FullName, assemblyNameOrPath)
-                    : Path.Combine(Program.TagToolDirectory, assemblyNameOrPath);
+                    : Path.Combine(DirectoryPaths.Base, assemblyNameOrPath);
 
                 if (!File.Exists(fullPath))
                     return null;

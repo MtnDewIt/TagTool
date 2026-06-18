@@ -103,8 +103,8 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 ModelAnimationGraph oldJmad = CacheContext.Deserialize<ModelAnimationGraph>(cacheStream, block.InheritedGraph);
                 ModelAnimationGraph newJmad = CacheContext.Deserialize<ModelAnimationGraph>(cacheStream, newTag);
 
-                var thisRoot = JmadHelper.GetRootNode(Animation).ZPosition;
-                var newRoot = JmadHelper.GetRootNode(newJmad).ZPosition;
+                var thisRoot = AnimationUtil.GetRootNode(Animation).ZPosition;
+                var newRoot = AnimationUtil.GetRootNode(newJmad).ZPosition;
 
                 if (thisRoot == 0.0f || newRoot == 0.0f)
                     block.RootZOffset = 1.0f;
@@ -163,46 +163,46 @@ namespace TagTool.Commands.ModelAnimationGraphs
                     foreach (var fullLabel in specifics)
                     {
                         // check if the requested path through donor graph is valid
-                        var labels = JmadHelper.GetLabelStringIDs(fullLabel, CacheContext);
+                        var labels = AnimationUtil.GetLabelStringIDs(fullLabel, CacheContext);
                         if(labels.Count == 0 || labels.Contains(StringId.Invalid))
                             return new TagToolError(CommandError.CustomError, $"Part of the graph path {fullLabel} is invalid.");
 
-                        var toInherit = JmadHelper.TraverseGraph(newJmad, labels);
+                        var toInherit = AnimationUtil.TraverseGraph(newJmad, labels);
                         if (toInherit == null)
                             return new TagToolError(CommandError.CustomError, $"\"{fullLabel}\" not defined in {tagName}");
 
                         // modify, replace, or create entries in recipient graph where needed
                         if (toInherit is Mode donorMode)
                         {
-                            var mode = (Mode)JmadHelper.TraverseGraph(Animation, labels, true);
+                            var mode = (Mode)AnimationUtil.TraverseGraph(Animation, labels, true);
                             mode.WeaponClass = donorMode.WeaponClass;
                             mode.ModeIk = donorMode.ModeIk;
                             mode.FootDefaults = donorMode.FootDefaults;
                         }
                         else if (toInherit is Mode.WeaponClassBlock donorClass)
                         {
-                            var wclass = (Mode.WeaponClassBlock)JmadHelper.TraverseGraph(Animation, labels, true);
+                            var wclass = (Mode.WeaponClassBlock)AnimationUtil.TraverseGraph(Animation, labels, true);
                             wclass.WeaponType = donorClass.WeaponType;
                             wclass.WeaponIk = donorClass.WeaponIk;
                             wclass.SyncActionGroups = donorClass.SyncActionGroups;
                         }
                         else if (toInherit is Mode.WeaponClassBlock.WeaponTypeBlock donorType)
                         {
-                            var wtype = (Mode.WeaponClassBlock.WeaponTypeBlock)JmadHelper.TraverseGraph(Animation, labels, true);
+                            var wtype = (Mode.WeaponClassBlock.WeaponTypeBlock)AnimationUtil.TraverseGraph(Animation, labels, true);
                             wtype.Set = donorType.Set;
                         }
                         else if (toInherit is Mode.WeaponClassBlock.WeaponTypeBlock.Entry donorEntry)
                         {
-                            var entry = (Mode.WeaponClassBlock.WeaponTypeBlock.Entry)JmadHelper.TraverseGraph(Animation, labels, true);
+                            var entry = (Mode.WeaponClassBlock.WeaponTypeBlock.Entry)AnimationUtil.TraverseGraph(Animation, labels, true);
                             if (entry == null)
                             {
-                                var parent = (Mode.WeaponClassBlock.WeaponTypeBlock)JmadHelper.TraverseGraph(Animation, labels.GetRange(0, 3));
-                                switch(JmadHelper.GetEntryType(newJmad, labels))
+                                var parent = (Mode.WeaponClassBlock.WeaponTypeBlock)AnimationUtil.TraverseGraph(Animation, labels.GetRange(0, 3));
+                                switch(AnimationUtil.GetEntryType(newJmad, labels))
                                 {
-                                    case JmadHelper.AnimationSetEntryType.Action:
+                                    case AnimationUtil.AnimationSetEntryType.Action:
                                         parent.Set.Actions.Add(donorEntry);
                                         break;
-                                    case JmadHelper.AnimationSetEntryType.Overlay:
+                                    case AnimationUtil.AnimationSetEntryType.Overlay:
                                         parent.Set.Overlays.Add(donorEntry);
                                         break;
                                     default:
@@ -212,7 +212,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                         }
 
                         // assign graph index
-                        JmadHelper.SetGraphIndex(Animation, Index, labels);
+                        AnimationUtil.SetGraphIndex(Animation, Index, labels);
                     }
                 }
                 else

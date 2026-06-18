@@ -33,7 +33,7 @@ namespace TagTool.Commands.Gen4.ModelAnimationGraphs
                   "ExtractAnimation",
                   "Extract an animation to a JMA/JMM/JMO/JMR/JMW/JMZ/JMT file",
 
-                  "ExtractAnimation <index/all> <filepath>",
+                  "ExtractAnimation <name/index/all> <directory>",
 
                   "Extract an animation to a JMA/JMM/JMO/JMR/JMW/JMZ/JMT file. Use the index of the animation as the first argument or 'all' to extract all animations in this jmad.")
         {
@@ -44,22 +44,28 @@ namespace TagTool.Commands.Gen4.ModelAnimationGraphs
 
         public override object Execute(List<string> args)
         {
-            //Arguments needed: <index> <filepath>
             if (args.Count != 2)
                 return new TagToolError(CommandError.ArgCount);
 
             var argStack = new Stack<string>(args.AsEnumerable().Reverse());
 
             List<int> AnimationIndices = new List<int>();
-            var index = argStack.Pop();
-            if (index == "all")
-                AnimationIndices.AddRange(Enumerable.Range(0, Animation.Definitions.Animations.Count).ToList());
-            else
-                AnimationIndices.Add(int.Parse(index));
-            string directoryarg = argStack.Pop();
 
-            if (!Directory.Exists(directoryarg))
-                return new TagToolError(CommandError.FileNotFound);
+            var input = argStack.Pop();
+
+            if (input == "all")
+            {
+                AnimationIndices.AddRange(Enumerable.Range(0, Animation.Definitions.Animations.Count).ToList());
+            }
+            else if (AnimationUtil.TryParseAnimationIndexGen4(Animation, input, out int index)
+                || AnimationUtil.TryFindAnimationIndexGen4(Animation, CacheContext, input, out index))
+            {
+                AnimationIndices.Add(index);
+            }
+            else
+                return new TagToolError(CommandError.ArgInvalid, input);
+
+            string directoryarg = argStack.Pop();
 
             Console.WriteLine($"###Extracting {AnimationIndices.Count} animation(s)...");
 
@@ -119,7 +125,7 @@ namespace TagTool.Commands.Gen4.ModelAnimationGraphs
                         animation.InsertBaseFrame();
                     }
                 }
-                Console.WriteLine($"Exporting {str}");
+                Console.WriteLine($"Exporting \"{str}\"");
                 animation.Export(fileName);
             }
             Console.WriteLine("Done!");

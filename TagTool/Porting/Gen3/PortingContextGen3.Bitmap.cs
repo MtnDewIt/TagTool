@@ -104,7 +104,8 @@ namespace TagTool.Porting.Gen3
             {
                 ForceDxt5nm = Options.UseExperimentalDxt5nm,
                 HqNormalMapCompression = Options.HqNormalMapConversion,
-                Mode = mode
+                Mode = mode,
+                AllowOptimization = Options.BitmapFormatOptimization
             };
             return bitmapConverter.ConvertBitmap(bitmap, imageIndex, tagName);
         }

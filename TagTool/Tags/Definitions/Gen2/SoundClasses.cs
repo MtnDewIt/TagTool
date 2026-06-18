@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using TagTool.Audio;
 using TagTool.Cache;
 using TagTool.Common;
-using static TagTool.Audio.SoundClass;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
@@ -121,7 +121,7 @@ namespace TagTool.Tags.Definitions.Gen2
             public class SoundClassDucking : TagStructure
             {
                 [TagField(EnumType = typeof(int))]
-                public SoundClassHalo2 SoundClass;
+                public SoundClass SoundClass;
                 public float GainDB;
                 public float FadeInTime;
                 public float SustainTime;

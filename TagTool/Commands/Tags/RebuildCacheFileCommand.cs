@@ -49,7 +49,7 @@ namespace TagTool.Commands
                 dir.Delete(recursive: true);
             dir.Create();
 
-            var destCache = new GameCacheHaloOnline(dir);
+            var destCache = new GameCacheHaloOnline(dir, Cache.Version);
 
             // Ensure required resource cache files get created
             destCache.ResourceCaches.GetResourceCache(ResourceLocation.Audio);

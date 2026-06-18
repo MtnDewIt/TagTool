@@ -1,3 +1,4 @@
+using TagTool.Audio;
 using TagTool.Cache;
 using TagTool.Common;
 using System;
@@ -19,7 +20,8 @@ namespace TagTool.Tags.Definitions
 		[TagField(MinVersion = CacheVersion.HaloReach)]
 		public float MaximumFlybyRangeDistance;
 
-		public SoundClassValue SoundClass;
+		[TagField(EnumType = typeof(short))]
+		public SoundClass SoundClass;
 		public short LoopTypeHO; // padding in H3, unknown in Reach
 
 		[TagField(MinVersion = CacheVersion.HaloReach)] // This track's markers, flags, gain and fade settings are copied to the other tracks. 
@@ -48,75 +50,6 @@ namespace TagTool.Tags.Definitions
 			HasOptionalPlayerSound = 1 << 14,
 			DontOcclude = 1 << 15,
 			NegateRadiusBasedFocus = 1 << 16 // Use the opposite of the decision for whether to apply focus feature based on whether the sound is 2D or 3D
-		}
-		
-		public enum SoundClassValue : short
-		{
-			ProjectileImpact,
-			ProjectileDetonation,
-			ProjectileFlyby,
-			ProjectileDetonationLod,
-			WeaponFire,
-			WeaponReady,
-			WeaponReload,
-			WeaponEmpty,
-			WeaponCharge,
-			WeaponOverheat,
-			WeaponIdle,
-			WeaponMelee,
-			WeaponAnimation,
-			ObjectImpacts,
-			ParticleImpacts,
-			WeaponFireLod,
-			WeaponFireLodFar, // Unused1Impacts
-			Unused2Impacts,
-			UnitFootsteps,
-			UnitDialog,
-			UnitAnimation,
-			UnitUnused,
-			VehicleCollision,
-			VehicleEngine,
-			VehicleAnimation,
-			VehicleEngineLod,
-			DeviceDoor,
-			DeviceUnused0,
-			DeviceMachinery,
-			DeviceStationary,
-			DeviceUnused1,
-			DeviceUnused2,
-			Music,
-			AmbientNature,
-			AmbientMachinery,
-			AmbientStationary,
-			HugeAss,
-			ObjectLooping,
-			CinematicMusic,
-			PlayerArmor, // UnknownUnused0
-			UnknownUnused1,
-			AmbientFlock,
-			NoPad,
-			NoPadStationary,
-			Arg, // MissionUnused0
-			CortanaMission,
-			CortanaGravemindChannel,
-			MissionDialog,
-			CinematicDialog,
-			ScriptedCinematicFoley,
-			Hud,	// HO only?
-			GameEvent,
-			Ui,
-			Test,
-			MultilingualTest,
-			AmbientNatureDetails,
-			AmbientMachineryDetails,
-			InsideSurroundTail,
-			OutsideSurroundTail,
-			VehicleDetonation,
-			AmbientDetonation,
-			FirstPersonInside,
-			FirstPersonOutside,
-			FirstPersonAnywhere,
-			UiPda,
 		}
 		
 		[TagStructure(Size = 0x90, MaxVersion = CacheVersion.Halo3Retail)]

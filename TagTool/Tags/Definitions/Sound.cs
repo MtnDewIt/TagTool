@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using TagTool.Audio;
 using TagTool.Cache;
+using TagTool.Common;
 
 namespace TagTool.Tags.Definitions
 {
@@ -15,11 +16,9 @@ namespace TagTool.Tags.Definitions
 	{    
         [TagField(EnumType = typeof(ushort), MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.Halo3ODST)]
         [TagField(EnumType = typeof(uint), MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-        public FlagsValue Flags;
-
         [TagField(EnumType = typeof(ushort), Version = CacheVersion.HaloReach)]
-        [TagField(EnumType = typeof(uint), Version = CacheVersion.HaloReach11883)]
-        public FlagsValueReach FlagsReach;
+        [TagField(EnumType = typeof(uint), MinVersion = CacheVersion.HaloReach11883)]
+        public BitFlags<SoundFlags> Flags;
 
         [TagField(Gen = CacheGeneration.HaloOnline)]
         [TagField(BuildType = CacheBuildType.TagsBuild)]
@@ -28,6 +27,7 @@ namespace TagTool.Tags.Definitions
         [TagField(BuildType = CacheBuildType.TagsBuild)]
         public SoundXsyncFlags XSyncFlags;
         
+        [TagField(EnumType = typeof(sbyte))]
         public SoundClass SoundClass;
 
         [TagField(Gen = CacheGeneration.HaloOnline)]
@@ -107,44 +107,6 @@ namespace TagTool.Tags.Definitions
                 default:
                     return Resource;
             }
-        }
-
-        [Flags]
-        public enum FlagsValue : ushort
-        {
-            None = 0,
-            FitToAdpcmBlocksize = 1 << 0,
-            AlwaysSpatialize = 1 << 1,
-            NeverObstruct = 1 << 2,
-            InternalDontTouch = 1 << 3,
-            UseHugeTransmission = 1 << 4,
-            LinkCountToOwnerUnit = 1 << 5,
-            PitchRangeIsLanguage = 1 << 6,
-            DontUseSoundClassSpeakerFlag = 1 << 7,
-            DontUseLipsyncData = 1 << 8,
-            InstantSoundPropagation = 1 << 9,
-            FakeSpatializationWithDistance = 1 << 10,
-            PlayPermutationsInOrder = 1 << 11,
-            Bit12 = 1 << 12
-        }
-
-        [Flags]
-        public enum FlagsValueReach : ushort
-        {
-            None = 0,
-            FitToAdpcmBlocksize = 1 << 0,
-            AlwaysSpatialize = 1 << 1,
-            NeverObstruct = 1 << 2,
-            InternalDontTouch = 1 << 3,
-            FacialAnimationDataIsStripped = 1 << 4,
-            UseHugeTransmission = 1 << 5,
-            LinkCountToOwnerUnit = 1 << 6,
-            PitchRangeIsLanguage = 1 << 7,
-            DontUseSoundClassSpeakerFlag = 1 << 8,
-            DontUseLipsyncData = 1 << 9,
-            InstantSoundPropagation = 1 << 10,
-            FakeSpatializationWithDistance = 1 << 11,
-            PlayPermutationsInOrder = 1 << 12 // verify this
         }
 
         [Flags]

@@ -5,6 +5,7 @@ using TagTool.Cache;
 using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
 using TagTool.Common;
+using TagTool.Geometry.Ass;
 using TagTool.Geometry.BspCollisionGeometry.Utils;
 using System.Linq;
 
@@ -13,21 +14,23 @@ namespace TagTool.Commands.StructureDesigns
     public class ExtractStructureDesignCommand : Command
     {
         private GameCache Cache { get; }
+        private CachedTag Tag { get; }
         private StructureDesign Definition { get; }
         public float[,] Bounds = new float[3, 2];
         public List<float> BoundingCoords = new List<float>();
 
-        public ExtractStructureDesignCommand(GameCache cache, StructureDesign definition) :
+        public ExtractStructureDesignCommand(GameCache cache, CachedTag tag, StructureDesign definition) :
             base(true,
 
                 "ExtractStructureDesign",
                 "",
 
-                "ExtractStructureDesign <OBJ File>",
+                "ExtractStructureDesign <path>",
 
                 "")
         {
             Cache = cache;
+            Tag = tag;
             Definition = definition;
         }
 
@@ -35,6 +38,35 @@ namespace TagTool.Commands.StructureDesigns
         {
             if (args.Count != 1)
                 return new TagToolError(CommandError.ArgCount);
+
+            string path = args[0];
+            string[] formats = [".ass", ".obj"];
+            string extension = Path.GetExtension(path);
+            bool hasExtension = !string.IsNullOrEmpty(extension);
+
+            if (hasExtension)
+            {
+                if (!formats.Contains(extension))
+                    return new TagToolError(CommandError.FileIO, $"Invalid format. Supported: {string.Join(',', formats)}");
+            }
+            else
+            {
+                extension = ".ass";
+                path = Path.Combine(args[0], $"{Tag.Name.Split('\\').Last()}{extension}");
+            }
+
+            if (extension == ".ass")
+            {
+                FileInfo file = new(path);
+                AssFormat ass = new();
+
+                AssExporter exporter = new(Cache, ass);
+                exporter.Export(Definition);
+                ass.Write(file);
+
+                Console.WriteLine("Done!");
+                return true;
+            }
 
             setup_bounding_coords();
 
@@ -101,6 +133,7 @@ namespace TagTool.Commands.StructureDesigns
                 }
             }
 
+            Console.WriteLine("Done!");
             return true;
         }
         public void setup_bounding_coords()

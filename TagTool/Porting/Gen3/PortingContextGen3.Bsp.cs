@@ -71,7 +71,7 @@ namespace TagTool.Porting.Gen3
                     cluster.DecoratorGrids = newDecoratorGrids;
                 }
                 
-                if(CacheContext.Version == CacheVersion.HaloOnlineED && BlamCache.Version < CacheVersion.HaloReach)
+                if(BlamCache.Version < CacheVersion.HaloReach)
                 {
                     foreach (var cubemap in cluster.ClusterCubemaps)
                     {

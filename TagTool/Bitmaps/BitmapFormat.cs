@@ -26,11 +26,14 @@ namespace TagTool.Bitmaps
         Dxt1,
         Dxt3,
         Dxt5,
+        [TagEnumMember(Gen = Cache.CacheGeneration.Second)]
+        P8Bump,
+        [TagEnumMember(MinVersion = Cache.CacheVersion.Halo3Beta)]
         A4R4G4B4Font,
-        Unused7,
-        Unused8,
-        SoftwareRgbfp32,
-        Unused9,
+        P8, // gen2 only
+        Argbfp32, // gen2 only
+        Rgbfp32,
+        Rgbfp16, // gen2 only
         V8U8,
         G8B8,
         Abgrfp32,
@@ -71,60 +74,6 @@ namespace TagTool.Bitmaps
 
     public static class BitmapFormatUtils
     {
-
-       private static readonly int[] BitsPerPixelTable = new int[]
-       {
-            8,   // A8
-            8,   // Y8
-            8,   // AY8
-            16,  // A8Y8
-            8,   // R8
-            0,   // Unused2
-            16,  // R5G6B5
-            0,   // Unused3
-            16,  // A1R5G5B5
-            16,  // A4R4G4B4
-            32,  // X8R8G8B8
-            32,  // A8R8G8B8
-            0,   // Unused4
-            8,   // Dxt5nm
-            4,   // Dxt1
-            8,   // Dxt3
-            8,   // Dxt5
-            16,  // A4R4G4B4Font
-            0,   // Unused7
-            128, // Unused8
-            96,  // SoftwareRgbfp32
-            48,  // Unused9
-            16,  // V8U8
-            16,  // G8B8
-            128, // Abgrfp32
-            64,  // Abgrfp16
-            16,  // F16Mono
-            16,  // F16Red
-            32,  // Q8W8V8U8
-            32,  // A2R10G10B10
-            64,  // A16B16G16R16
-            32,  // V16U16
-            16,  // L16
-            32,  // R16G16
-            64,  // SignedR16G16B16A16
-            4,   // Dxt3A
-            4,   // Dxt5A
-            4,   // Dxt3A1111
-            8,   // Dxn
-            4,   // Ctx1
-            4,   // Dxt3AAlpha
-            4,   // Dxt3AMono
-            4,   // Dxt5AAlpha
-            4,   // Dxt5AMono
-            8,   // DxnMonoAlpha
-            8,   // Dxt5Red
-            8,   // Dxt5Green
-            8,   // Dxt5Blue
-            32   // Depth24
-       };
-
         /// <summary>
         /// Get the number of bits per pixel of a bitmap format.
         /// </summary>
@@ -132,7 +81,74 @@ namespace TagTool.Bitmaps
         /// <returns></returns>
         public static int GetBitsPerPixel(BitmapFormat format)
         {
-            return BitsPerPixelTable[(int)format];
+            switch (format)
+            {
+                case BitmapFormat.Dxt1:
+                case BitmapFormat.Dxt3a:
+                case BitmapFormat.Dxt5a:
+                case BitmapFormat.Dxt3A1111:
+                case BitmapFormat.Ctx1:
+                case BitmapFormat.Dxt3aAlpha:
+                case BitmapFormat.Dxt3aMono:
+                case BitmapFormat.Dxt5aAlpha:
+                case BitmapFormat.Dxt5aMono:
+                    return 4;
+
+                case BitmapFormat.A8:
+                case BitmapFormat.Y8:
+                case BitmapFormat.AY8:
+                case BitmapFormat.R8:
+                case BitmapFormat.P8:
+                case BitmapFormat.P8Bump:
+                case BitmapFormat.Dxt5nm:
+                case BitmapFormat.Dxt3:
+                case BitmapFormat.Dxt5:
+                case BitmapFormat.Dxn:
+                case BitmapFormat.DxnMonoAlpha:
+                case BitmapFormat.Dxt5Red:
+                case BitmapFormat.Dxt5Green:
+                case BitmapFormat.Dxt5Blue:
+                    return 8;
+
+                case BitmapFormat.A8Y8:
+                case BitmapFormat.R5G6B5:
+                case BitmapFormat.A1R5G5B5:
+                case BitmapFormat.A4R4G4B4:
+                case BitmapFormat.A4R4G4B4Font:
+                case BitmapFormat.V8U8:
+                case BitmapFormat.G8B8:
+                case BitmapFormat.F16Mono:
+                case BitmapFormat.F16Red:
+                case BitmapFormat.L16:
+                    return 16;
+
+                case BitmapFormat.X8R8G8B8:
+                case BitmapFormat.A8R8G8B8:
+                case BitmapFormat.Q8W8V8U8:
+                case BitmapFormat.A2R10G10B10:
+                case BitmapFormat.V16U16:
+                case BitmapFormat.R16G16:
+                case BitmapFormat.Depth24:
+                    return 32;
+
+                case BitmapFormat.Rgbfp16:
+                    return 48;
+
+                case BitmapFormat.Abgrfp16:
+                case BitmapFormat.A16B16G16R16:
+                case BitmapFormat.SignedR16G16B16A16:
+                    return 64;
+
+                case BitmapFormat.Rgbfp32:
+                    return 96;
+
+                case BitmapFormat.Argbfp32:
+                case BitmapFormat.Abgrfp32:
+                    return 128;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(format), format, null);
+            }
         }
 
         /// <summary>

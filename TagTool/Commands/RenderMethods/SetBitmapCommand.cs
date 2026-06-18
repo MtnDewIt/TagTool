@@ -21,7 +21,7 @@ namespace TagTool.Commands.RenderMethods
 
                  "SetBitmap <textureParameterName> <tagname or default bitmap> [transform]",
 
-				 "Sets the bitmap for the specified texture constant in the render_method.")
+                 "Sets the bitmap for the specified texture constant in the render_method.")
         {
             Cache = cache;
             Tag = tag;
@@ -51,20 +51,30 @@ namespace TagTool.Commands.RenderMethods
                 template = Cache.Deserialize<RenderMethodTemplate>(cacheStream, Definition.ShaderProperties[0].Template);
             }
 
+            var parameterId = StringId.Invalid;
             int parameterIndex = -1;
-			for (var i = 0; i < template.TextureParameterNames.Count; i++)
+
+            for (var i = 0; i < template.TextureParameterNames.Count; i++)
             {
-                if (Cache.StringTable.GetString(template.TextureParameterNames[i].Name) == args[0])
+                var textureNameBlock = template.TextureParameterNames[i];
+                if (Cache.StringTable.GetString(textureNameBlock.Name) == args[0])
                 {
-					parameterIndex = i;
+                    parameterIndex = i;
+                    parameterId = textureNameBlock.Name;
                     break;
                 }
             }
 
-			if (parameterIndex < 0)
-				return new TagToolError(CommandError.ArgInvalid, $"Invalid texture parameter name: {args[0]}");
+            if (parameterIndex < 0)
+                return new TagToolError(CommandError.ArgInvalid, $"Invalid texture parameter name: {args[0]}");
 
             Definition.ShaderProperties[0].TextureConstants[parameterIndex].Bitmap = tagInstance;
+            if (Definition.Parameters.Count != 0)
+            {
+                var parameterBlock = Definition.Parameters.Find(n => n.Name == parameterId);
+                if (parameterBlock != null)
+                    parameterBlock.Bitmap = tagInstance;
+            }
 
             var realConstants = Definition.ShaderProperties[0].RealConstants[0];
 

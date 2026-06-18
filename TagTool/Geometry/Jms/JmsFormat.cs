@@ -4,6 +4,7 @@ using System.IO;
 using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.Common.Logging;
+using TagTool.Geometry.Utils;
 
 namespace TagTool.Geometry.Jms
 {
@@ -56,7 +57,7 @@ namespace TagTool.Geometry.Jms
 
         public void Write(FileInfo file)
         {
-            using(var stream = file.CreateText())
+            using (var stream = BlamAssetWriter.Create(file))
             {
                 stream.WriteLine(";### VERSION ###");
                 stream.WriteLine(Version);
@@ -399,19 +400,19 @@ namespace TagTool.Geometry.Jms
         {
             public string Name = "default";
             public int ParentNodeIndex = -1;
-            public RealQuaternion Rotation = new RealQuaternion(0, 0, 0, 0);
+            public RealQuaternion Rotation = new RealQuaternion(0, 0, 0, 1);
             public RealVector3d Position = new RealVector3d(0, 0, 0);
 
             public void Read(StreamReader stream)
             {
             }
 
-            public void Write(StreamWriter stream)
+            public void Write(BlamAssetWriter stream)
             {
                 stream.WriteLine(Name);
                 stream.WriteLine(ParentNodeIndex);
-                WriteQuaternion(Rotation, stream);
-                WriteVector3d(Position, stream);            
+                stream.WriteQuaternion(Rotation);
+                stream.WriteVector3d(Position);            
             }
         }
 
@@ -426,7 +427,7 @@ namespace TagTool.Geometry.Jms
                 MaterialName = stream.ReadLine();
             }
 
-            public void Write(StreamWriter stream)
+            public void Write(BlamAssetWriter stream)
             {
                 stream.WriteLine(Name);
                 stream.WriteLine(MaterialName);
@@ -437,7 +438,7 @@ namespace TagTool.Geometry.Jms
         {
             public string Name = "default";
             public int NodeIndex = -1;
-            public RealQuaternion Rotation = new RealQuaternion(0, 0, 0, 0);
+            public RealQuaternion Rotation = new RealQuaternion(0, 0, 0, 1);
             public RealVector3d Translation = new RealVector3d(0, 0, 0);
             public float Radius = 0.0f;
 
@@ -445,13 +446,13 @@ namespace TagTool.Geometry.Jms
             {
             }
 
-            public void Write(StreamWriter stream)
+            public void Write(BlamAssetWriter stream)
             {
                 stream.WriteLine(Name);
                 stream.WriteLine(NodeIndex);
-                WriteQuaternion(Rotation, stream);
-                WriteVector3d(Translation, stream);
-                WriteFloat(Radius, stream);
+                stream.WriteQuaternion(Rotation);
+                stream.WriteVector3d(Translation);
+                stream.WriteFloat(Radius);
             }
         }
 
@@ -475,17 +476,17 @@ namespace TagTool.Geometry.Jms
             public void Read(StreamReader stream)
             {
             }
-            public void Write(StreamWriter stream)
+            public void Write(BlamAssetWriter stream)
             {
-                WritePoint3d(Position, stream);
-                WriteVector3d(Normal, stream);
+                stream.WritePoint3d(Position);
+                stream.WriteVector3d(Normal);
                 stream.WriteLine(NodeSets.Count);
                 if (NodeSets.Count > 0)
                 {
                     foreach (var nodeset in NodeSets)
                     {
                         stream.WriteLine(nodeset.NodeIndex);
-                        WriteFloat(nodeset.NodeWeight, stream);
+                        stream.WriteFloat(nodeset.NodeWeight);
                     }
                 }
                 stream.WriteLine(UvSets.Count);
@@ -493,11 +494,11 @@ namespace TagTool.Geometry.Jms
                 {
                     foreach (var uvset in UvSets)
                     {
-                        WritePoint2d(uvset.TextureCoordinates, stream);
+                        stream.WritePoint2d(uvset.TextureCoordinates);
                     }
                 }
                 //color is null
-                WritePoint3d(new RealPoint3d(), stream);
+                stream.WritePoint3d(new RealPoint3d());
             }
         }
 
@@ -516,7 +517,7 @@ namespace TagTool.Geometry.Jms
                     VertexIndices.Add(int.Parse(indexArray[index]));
             }
 
-            public void Write(StreamWriter stream)
+            public void Write(BlamAssetWriter stream)
             {
                 stream.WriteLine(MaterialIndex);
                 stream.WriteLine($"{VertexIndices[0]}\t{VertexIndices[1]}\t{VertexIndices[2]}");
@@ -528,7 +529,7 @@ namespace TagTool.Geometry.Jms
             public string Name = "default";
             public int Parent = -1;
             public int Material = -1;
-            public RealQuaternion Rotation = new RealQuaternion(0, 0, 0, 0);
+            public RealQuaternion Rotation = new RealQuaternion(0, 0, 0, 1);
             public RealVector3d Translation = new RealVector3d(0, 0, 0);
             public float Radius = 0.0f;
 
@@ -536,14 +537,14 @@ namespace TagTool.Geometry.Jms
             {
             }
 
-            public void Write(StreamWriter stream)
+            public void Write(BlamAssetWriter stream)
             {
                 stream.WriteLine(Name);
                 stream.WriteLine(Parent);
                 stream.WriteLine(Material);
-                WriteQuaternion(Rotation, stream);
-                WriteVector3d(Translation, stream);
-                WriteFloat(Radius, stream);
+                stream.WriteQuaternion(Rotation);
+                stream.WriteVector3d(Translation);
+                stream.WriteFloat(Radius);
             }
         }
 
@@ -552,7 +553,7 @@ namespace TagTool.Geometry.Jms
             public string Name = "default";
             public int Parent = -1;
             public int Material = -1;
-            public RealQuaternion Rotation = new RealQuaternion(0, 0, 0, 0);
+            public RealQuaternion Rotation = new RealQuaternion(0, 0, 0, 1);
             public RealVector3d Translation = new RealVector3d(0, 0, 0);
             public float Width = 0.0f;
             public float Length = 0.0f;
@@ -562,16 +563,16 @@ namespace TagTool.Geometry.Jms
             {
             }
 
-            public void Write(StreamWriter stream)
+            public void Write(BlamAssetWriter stream)
             {
                 stream.WriteLine(Name);
                 stream.WriteLine(Parent);
                 stream.WriteLine(Material);
-                WriteQuaternion(Rotation, stream);
-                WriteVector3d(Translation, stream);
-                WriteFloat(Width, stream);
-                WriteFloat(Length, stream);
-                WriteFloat(Height, stream);
+                stream.WriteQuaternion(Rotation);
+                stream.WriteVector3d(Translation);
+                stream.WriteFloat(Width);
+                stream.WriteFloat(Length);
+                stream.WriteFloat(Height);
             }
         }
 
@@ -580,7 +581,7 @@ namespace TagTool.Geometry.Jms
             public string Name = "default";
             public int Parent = -1;
             public int Material = -1;
-            public RealQuaternion Rotation = new RealQuaternion(0, 0, 0, 0);
+            public RealQuaternion Rotation = new RealQuaternion(0, 0, 0, 1);
             public RealVector3d Translation = new RealVector3d(0, 0, 0);
             public float Height = 0.0f;
             public float Radius = 0.0f;
@@ -589,15 +590,15 @@ namespace TagTool.Geometry.Jms
             {
             }
 
-            public void Write(StreamWriter stream)
+            public void Write(BlamAssetWriter stream)
             {
                 stream.WriteLine(Name);
                 stream.WriteLine(Parent);
                 stream.WriteLine(Material);
-                WriteQuaternion(Rotation, stream);
-                WriteVector3d(Translation, stream);
-                WriteFloat(Height, stream);
-                WriteFloat(Radius, stream);
+                stream.WriteQuaternion(Rotation);
+                stream.WriteVector3d(Translation);
+                stream.WriteFloat(Height);
+                stream.WriteFloat(Radius);
             }
         }
 
@@ -606,7 +607,7 @@ namespace TagTool.Geometry.Jms
             public string Name = "default";
             public int Parent = -1;
             public int Material = -1;
-            public RealQuaternion Rotation = new RealQuaternion(0, 0, 0, 0);
+            public RealQuaternion Rotation = new RealQuaternion(0, 0, 0, 1);
             public RealVector3d Translation = new RealVector3d(0, 0, 0);
             public int ShapeVertexCount = 0;
             public List<RealPoint3d> ShapeVertices = new List<RealPoint3d>();
@@ -615,16 +616,16 @@ namespace TagTool.Geometry.Jms
             {
             }
 
-            public void Write(StreamWriter stream)
+            public void Write(BlamAssetWriter stream)
             {
                 stream.WriteLine(Name);
                 stream.WriteLine(Parent);
                 stream.WriteLine(Material);
-                WriteQuaternion(Rotation, stream);
-                WriteVector3d(Translation, stream);
+                stream.WriteQuaternion(Rotation);
+                stream.WriteVector3d(Translation);
                 stream.WriteLine(ShapeVertexCount);
                 foreach(var shapevert in ShapeVertices)
-                    WritePoint3d(shapevert, stream);
+                    stream.WritePoint3d(shapevert);
             }
         }
 
@@ -633,9 +634,9 @@ namespace TagTool.Geometry.Jms
             public string Name = "default";
             public int AttachedIndex = -1;
             public int ReferencedIndex = -1;
-            public RealQuaternion AttachedTransformOrientation = new RealQuaternion(0, 0, 0, 0);
+            public RealQuaternion AttachedTransformOrientation = new RealQuaternion(0, 0, 0, 1);
             public RealVector3d AttachedTransformPosition = new RealVector3d(0, 0, 0);
-            public RealQuaternion ReferenceTransformOrientation = new RealQuaternion(0, 0, 0, 0);
+            public RealQuaternion ReferenceTransformOrientation = new RealQuaternion(0, 0, 0, 1);
             public RealVector3d ReferenceTransformPosition = new RealVector3d(0, 0, 0);
             public float MinTwist;
             public float MaxTwist;
@@ -648,22 +649,22 @@ namespace TagTool.Geometry.Jms
             {
             }
 
-            public void Write(StreamWriter stream)
+            public void Write(BlamAssetWriter stream)
             {
                 stream.WriteLine(Name);
                 stream.WriteLine(AttachedIndex);
                 stream.WriteLine(ReferencedIndex);
-                WriteQuaternion(AttachedTransformOrientation, stream);
-                WriteVector3d(AttachedTransformPosition, stream);
-                WriteQuaternion(ReferenceTransformOrientation, stream);
-                WriteVector3d(ReferenceTransformPosition, stream);
-                WriteFloat(MinTwist, stream);
-                WriteFloat(MaxTwist, stream);
-                WriteFloat(MinCone, stream);
-                WriteFloat(MaxCone, stream); 
-                WriteFloat(MinPlane, stream);
-                WriteFloat(MaxPlane, stream);
-                WriteFloat(FrictionLimit, stream);
+                stream.WriteQuaternion(AttachedTransformOrientation);
+                stream.WriteVector3d(AttachedTransformPosition);
+                stream.WriteQuaternion(ReferenceTransformOrientation);
+                stream.WriteVector3d(ReferenceTransformPosition);
+                stream.WriteFloat(MinTwist);
+                stream.WriteFloat(MaxTwist);
+                stream.WriteFloat(MinCone);
+                stream.WriteFloat(MaxCone); 
+                stream.WriteFloat(MinPlane);
+                stream.WriteFloat(MaxPlane);
+                stream.WriteFloat(FrictionLimit);
             }
         }
 
@@ -672,9 +673,9 @@ namespace TagTool.Geometry.Jms
             public string Name = "default";
             public int BodyAIndex = -1;
             public int BodyBIndex = -1;
-            public RealQuaternion BodyATransformOrientation = new RealQuaternion(0, 0, 0, 0);
+            public RealQuaternion BodyATransformOrientation = new RealQuaternion(0, 0, 0, 1);
             public RealVector3d BodyATransformPosition = new RealVector3d(0, 0, 0);
-            public RealQuaternion BodyBTransformOrientation = new RealQuaternion(0, 0, 0, 0);
+            public RealQuaternion BodyBTransformOrientation = new RealQuaternion(0, 0, 0, 1);
             public RealVector3d BodyBTransformPosition = new RealVector3d(0, 0, 0);
             public int IsLimited;
             public float FrictionLimit;
@@ -684,19 +685,19 @@ namespace TagTool.Geometry.Jms
             {
             }
 
-            public void Write(StreamWriter stream)
+            public void Write(BlamAssetWriter stream)
             {
                 stream.WriteLine(Name);
                 stream.WriteLine(BodyAIndex);
                 stream.WriteLine(BodyBIndex);
-                WriteQuaternion(BodyATransformOrientation, stream);
-                WriteVector3d(BodyATransformPosition, stream);
-                WriteQuaternion(BodyBTransformOrientation, stream);
-                WriteVector3d(BodyBTransformPosition, stream);
+                stream.WriteQuaternion(BodyATransformOrientation);
+                stream.WriteVector3d(BodyATransformPosition);
+                stream.WriteQuaternion(BodyBTransformOrientation);
+                stream.WriteVector3d(BodyBTransformPosition);
                 stream.WriteLine(IsLimited);
-                WriteFloat(FrictionLimit, stream);
-                WriteFloat(MinAngle, stream);
-                WriteFloat(MaxAngle, stream);
+                stream.WriteFloat(FrictionLimit);
+                stream.WriteFloat(MinAngle);
+                stream.WriteFloat(MaxAngle);
             }
         }
 
@@ -710,70 +711,16 @@ namespace TagTool.Geometry.Jms
             {
             }
 
-            public void Write(StreamWriter stream)
+            public void Write(BlamAssetWriter stream)
             {
-                WriteVector3d(Direction, stream);
-                WriteVector3d(RadiantIntensity, stream);
-                WriteFloat(SolidAngle, stream);
+                stream.WriteVector3d(Direction);
+                stream.WriteVector3d(RadiantIntensity);
+                stream.WriteFloat(SolidAngle);
             }
         }
 
-        //inherited class that contains all of the writing methods
         public class JmsElement
         {
-            public void WriteQuaternion(RealQuaternion quaternion, StreamWriter stream)
-            {
-                stream.Write(quaternion.I.ToString("0.0000000000"));
-                stream.Write('\t');
-                stream.Write(quaternion.J.ToString("0.0000000000"));
-                stream.Write('\t');
-                stream.Write(quaternion.K.ToString("0.0000000000"));
-                stream.Write('\t');
-                stream.Write(quaternion.W.ToString("0.0000000000"));
-                stream.WriteLine();
-            }
-
-            public void WriteVector3d(RealVector3d point, StreamWriter stream)
-            {
-                stream.Write(point.I.ToString("0.0000000000"));
-                stream.Write('\t');
-                stream.Write(point.J.ToString("0.0000000000"));
-                stream.Write('\t');
-                stream.Write(point.K.ToString("0.0000000000"));
-                stream.WriteLine();
-            }
-            public void WritePoint3d(RealPoint3d point, StreamWriter stream)
-            {
-                stream.Write(point.X.ToString("0.0000000000"));
-                stream.Write('\t');
-                stream.Write(point.Y.ToString("0.0000000000"));
-                stream.Write('\t');
-                stream.Write(point.Z.ToString("0.0000000000"));
-                stream.WriteLine();
-            }
-            public void WriteRealRGB(RealRgbColor color, StreamWriter stream)
-            {
-                stream.Write(color.Red.ToString("0.0000000000"));
-                stream.Write('\t');
-                stream.Write(color.Green.ToString("0.0000000000"));
-                stream.Write('\t');
-                stream.Write(color.Blue.ToString("0.0000000000"));
-                stream.WriteLine();
-            }
-
-            public void WritePoint2d(RealPoint2d point, StreamWriter stream)
-            {
-                stream.Write(point.X.ToString("0.0000000000"));
-                stream.Write('\t');
-                stream.Write(point.Y.ToString("0.0000000000"));
-                stream.WriteLine();
-            }
-
-            public void WriteFloat(float number, StreamWriter stream)
-            {
-                stream.WriteLine(number.ToString("0.0000000000"));
-            }
-
             public RealVector3d ReadVector3d(StreamReader stream)
             {
                 string[] vector3dArray = stream.ReadLine().Split('\t');

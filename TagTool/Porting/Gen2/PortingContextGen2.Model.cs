@@ -114,14 +114,17 @@ namespace TagTool.Porting.Gen2
 
             AutoConverter.TranslateList(gen2Model.NewDamageInfo, model.NewDamageInfo);
             // Fixup NewDamageInfo
-            foreach (var newDmg in model.NewDamageInfo)
+            for (var newDmg = 0; newDmg < model.NewDamageInfo.Count; newDmg++)
             {
-                foreach(var dmgSec in newDmg.DamageSections)
+                for(var dmgSec = 0; dmgSec < model.NewDamageInfo[newDmg].DamageSections.Count; dmgSec++)
                 {
-                    foreach(var insRep in dmgSec.InstantResponses)
+                    for(var insRep = 0; insRep < model.NewDamageInfo[newDmg].DamageSections[dmgSec].InstantResponses.Count; insRep++)
                     {
-                        insRep.SecondaryRuntimeRegionIndex = -1;
-                        insRep.DestroyInstanceGroup = -1;
+
+                        model.NewDamageInfo[newDmg].DamageSections[dmgSec].InstantResponses[insRep].PrimaryTransitionEffect = gen2Model.NewDamageInfo[newDmg].DamageSections[dmgSec].InstantResponses[insRep].TransitionEffect;
+                        model.NewDamageInfo[newDmg].DamageSections[dmgSec].InstantResponses[insRep].TransitionDamageEffect = gen2Model.NewDamageInfo[newDmg].DamageSections[dmgSec].InstantResponses[insRep].DamageEffect.TransitionDamageEffect;
+                        model.NewDamageInfo[newDmg].DamageSections[dmgSec].InstantResponses[insRep].SecondaryRuntimeRegionIndex = -1;
+                        model.NewDamageInfo[newDmg].DamageSections[dmgSec].InstantResponses[insRep].DestroyInstanceGroup = -1;
                     }
                 }
             }

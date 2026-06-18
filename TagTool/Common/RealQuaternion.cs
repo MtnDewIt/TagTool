@@ -233,6 +233,17 @@ namespace TagTool.Common
             return new RealQuaternion(a, b, c, d);
         }
 
+        public static RealQuaternion RotationFromVector(RealVector3d vi, RealVector3d vf)
+        {
+            RealVector3d cross = RealVector3d.CrossProduct(vi, vf);
+            float dot = RealVector3d.DotProduct(vi, vf);
+            var mag_i = RealVector3d.Magnitude(vi);
+            var mag_v = RealVector3d.Magnitude(vf);
+
+            float w = (float)Math.Sqrt(Math.Pow(mag_i, 2) * Math.Pow(mag_v, 2)) + dot;
+            return new RealQuaternion(cross.I, cross.J, cross.K, w).Normalize();
+        }
+
         public RealQuaternion Point3DTransform(RealMatrix4x3 transform) =>
             transform.IsIdentity ?
                 this :

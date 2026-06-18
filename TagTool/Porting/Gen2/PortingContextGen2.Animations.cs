@@ -41,7 +41,7 @@ namespace TagTool.Porting.Gen2
             Animation.PrivateFlags |= ModelAnimationGraph.AnimationPrivateFlags.ReadyForUse;
 
             //convert skeleton nodes
-            foreach (var gen2Node in gen2Animation.Resources.SkeletonNodesAbcdcc)
+            foreach (var gen2Node in gen2Animation.Resources.SkeletonNodes)
                 Animation.SkeletonNodes.Add(new ModelAnimationGraph.SkeletonNode()
                 {
                     Name = gen2Node.Name,
@@ -56,7 +56,7 @@ namespace TagTool.Porting.Gen2
                 });
 
             //convert sound references
-            foreach(var gen2snd in gen2Animation.Resources.SoundReferencesAbcdcc)
+            foreach(var gen2snd in gen2Animation.Resources.SoundReferences)
             {
                 Animation.SoundReferences.Add(new ModelAnimationGraph.AnimationTagReference
                 {
@@ -66,7 +66,7 @@ namespace TagTool.Porting.Gen2
             }
 
             //convert effect references
-            foreach (var gen2effe in gen2Animation.Resources.EffectReferencesAbcdcc)
+            foreach (var gen2effe in gen2Animation.Resources.EffectReferences)
             {
                 Animation.EffectReferences.Add(new ModelAnimationGraph.AnimationTagReference
                 {
@@ -76,7 +76,7 @@ namespace TagTool.Porting.Gen2
             }
 
             //convert BlendScreens
-            foreach (var gen2blend in gen2Animation.Resources.BlendScreensAbcdcc)
+            foreach (var gen2blend in gen2Animation.Resources.BlendScreens)
                 Animation.BlendScreens.Add(new ModelAnimationGraph.BlendScreen()
                 {
                     Label = gen2blend.Label,
@@ -99,7 +99,7 @@ namespace TagTool.Porting.Gen2
 
             //fixup for h2x, get raw resource data and place it in the animation blocks
             if (BlamCache.Version < CacheVersion.Halo2PC)
-                foreach (var gen2anim in gen2Animation.Resources.AnimationsAbcdcc)
+                foreach (var gen2anim in gen2Animation.Resources.Animations)
                 {
                     GameCacheGen2 gen2Cache = (GameCacheGen2)BlamCache;
                     byte[] rawdata = gen2Cache.GetCacheRawData(gen2Animation.AnimationData[gen2anim.ResourceIndex].RawDataOffset, gen2Animation.AnimationData[gen2anim.ResourceIndex].DataSize);
@@ -109,10 +109,10 @@ namespace TagTool.Porting.Gen2
                 };
 
             //convert Animations
-            foreach (var gen2anim in gen2Animation.Resources.AnimationsAbcdcc)
+            foreach (var gen2anim in gen2Animation.Resources.Animations)
             {
                 var Sounds = new List<ModelAnimationGraph.Animation.SoundEvent>();
-                foreach(var gen2snd in gen2anim.SoundEventsAbcdcc)
+                foreach(var gen2snd in gen2anim.SoundEvents)
                 {
                     Sounds.Add(new ModelAnimationGraph.Animation.SoundEvent()
                     {
@@ -123,7 +123,7 @@ namespace TagTool.Porting.Gen2
                 }
 
                 var Effects = new List<ModelAnimationGraph.Animation.EffectEvent>();
-                foreach (var gen2effe in gen2anim.EffectEventsAbcdcc)
+                foreach (var gen2effe in gen2anim.EffectEvents)
                 {
                     Effects.Add(new ModelAnimationGraph.Animation.EffectEvent()
                     {
@@ -133,7 +133,7 @@ namespace TagTool.Porting.Gen2
                 }
 
                 var Frames = new List<ModelAnimationGraph.Animation.FrameEvent>();
-                foreach (var gen2frame in gen2anim.FrameEventsAbcdcc)
+                foreach (var gen2frame in gen2anim.FrameEvents)
                     Frames.Add(new ModelAnimationGraph.Animation.FrameEvent()
                     {
                         TypeHO = (ModelAnimationGraph.Animation.FrameEventTypeHO)gen2frame.Type,
@@ -141,7 +141,7 @@ namespace TagTool.Porting.Gen2
                     });
 
                 var Spacenodes = new List<ModelAnimationGraph.Animation.ObjectSpaceParentNode>();
-                foreach (var gen2spacenode in gen2anim.ObjectSpaceParentNodesAbcdcc)
+                foreach (var gen2spacenode in gen2anim.ObjectSpaceParentNodes)
                     Spacenodes.Add(new ModelAnimationGraph.Animation.ObjectSpaceParentNode()
                     {
                         NodeIndex = gen2spacenode.NodeIndex,
@@ -222,7 +222,7 @@ namespace TagTool.Porting.Gen2
             });
 
             //convert modes
-            foreach (var gen2mode in gen2Animation.Content.ModesAabbcc)
+            foreach (var gen2mode in gen2Animation.Content.Modes)
             {
                 var newMode = new ModelAnimationGraph.Mode()
                 {
@@ -231,7 +231,7 @@ namespace TagTool.Porting.Gen2
                     ModeIk = new List<ModelAnimationGraph.Mode.ModeIkBlock>()
                 };
                 //weapon classes
-                foreach (var gen2wc in gen2mode.WeaponClassAabbcc)
+                foreach (var gen2wc in gen2mode.WeaponClass)
                 {
                     var newWeaponClass = new ModelAnimationGraph.Mode.WeaponClassBlock()
                     {
@@ -240,7 +240,7 @@ namespace TagTool.Porting.Gen2
                         WeaponIk = new List<ModelAnimationGraph.Mode.ModeIkBlock>()
                     };
                     //weapon types
-                    foreach (var gen2wt in gen2wc.WeaponTypeAabbcc)
+                    foreach (var gen2wt in gen2wc.WeaponType)
                     {
                         var newWeaponType = new ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock()
                         {
@@ -255,7 +255,7 @@ namespace TagTool.Porting.Gen2
                         };
 
                         //weapon type actions
-                        foreach (var gen2action in gen2wt.ActionsAabbcc)
+                        foreach (var gen2action in gen2wt.Actions)
                         {
                             var newAction = new ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.Entry()
                             {
@@ -266,7 +266,7 @@ namespace TagTool.Porting.Gen2
                             newWeaponType.Set.Actions.Add(newAction);
                         }
                         //weapon type overlays
-                        foreach (var gen2overlay in gen2wt.OverlaysAabbcc)
+                        foreach (var gen2overlay in gen2wt.Overlays)
                         {
                             var newOverlay = new ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.Entry()
                             {
@@ -277,7 +277,7 @@ namespace TagTool.Porting.Gen2
                             newWeaponType.Set.Overlays.Add(newOverlay);
                         }
                         //weapon type deathanddamage
-                        foreach (var gen2death in gen2wt.DeathAndDamageAabbcc)
+                        foreach (var gen2death in gen2wt.DeathAndDamage)
                         {
                             var newDeath = new ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.DeathAndDamageBlock()
                             {
@@ -285,14 +285,14 @@ namespace TagTool.Porting.Gen2
                                 Directions = new List<ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.DeathAndDamageBlock.Direction>()
                             };
                             //deathanddamage directions
-                            foreach (var gen2direction in gen2death.DirectionsAabbcc)
+                            foreach (var gen2direction in gen2death.Directions)
                             {
                                 var newDirection = new ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.DeathAndDamageBlock.Direction()
                                 {
                                     Regions = new List<ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.DeathAndDamageBlock.Direction.Region>()
                                 };
                                 //direction regions
-                                foreach (var gen2region in gen2direction.RegionsAabbcc)
+                                foreach (var gen2region in gen2direction.Regions)
                                 {
                                     var newRegion = new ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.DeathAndDamageBlock.Direction.Region()
                                     {
@@ -306,7 +306,7 @@ namespace TagTool.Porting.Gen2
                             newWeaponType.Set.DeathAndDamage.Add(newDeath);
                         }
                         //weapon type transitions
-                        foreach (var gen2transition in gen2wt.TransitionsAabbcc)
+                        foreach (var gen2transition in gen2wt.Transitions)
                         {
                             var newTransition = new ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.Transition()
                             {
@@ -317,7 +317,7 @@ namespace TagTool.Porting.Gen2
                                 Destinations = new List<ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.Transition.Destination>()
                             };
                             //transition destinations
-                            foreach (var gen2destination in gen2transition.DestinationsAabbcc)
+                            foreach (var gen2destination in gen2transition.Destinations)
                             {
                                 var newDestination = new ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.Transition.Destination()
                                 {
@@ -337,7 +337,7 @@ namespace TagTool.Porting.Gen2
                         newWeaponClass.WeaponType.Add(newWeaponType);
                     }
                     //weapon class weapon IK
-                    foreach (var gen2wik in gen2wc.WeaponIkAabbcc)
+                    foreach (var gen2wik in gen2wc.WeaponIk)
                     {
                         var newWeaponIK = new ModelAnimationGraph.Mode.ModeIkBlock()
                         {
@@ -349,7 +349,7 @@ namespace TagTool.Porting.Gen2
                     newMode.WeaponClass.Add(newWeaponClass);
                 }
                 //model IKs
-                foreach (var gen2mik in gen2mode.ModeIkAabbcc)
+                foreach (var gen2mik in gen2mode.ModeIk)
                 {
                     var newModelIK = new ModelAnimationGraph.Mode.ModeIkBlock()
                     {
@@ -362,7 +362,7 @@ namespace TagTool.Porting.Gen2
             }
 
             //convert vehicle suspensions
-            foreach (var gen2suspension in gen2Animation.Content.VehicleSuspensionCcaabb)
+            foreach (var gen2suspension in gen2Animation.Content.VehicleSuspension)
             {
                 var newSuspension = new ModelAnimationGraph.VehicleSuspensionBlock()
                 {
@@ -382,7 +382,7 @@ namespace TagTool.Porting.Gen2
             }
 
             //convert object overlays
-            foreach(var gen2overlay in gen2Animation.Content.ObjectOverlaysCcaabb)
+            foreach(var gen2overlay in gen2Animation.Content.ObjectOverlays)
             {
                 var newOverlay = new ModelAnimationGraph.ObjectOverlay()
                 {
@@ -396,7 +396,7 @@ namespace TagTool.Porting.Gen2
             }
 
             //convert inheritance list
-            foreach(var gen2inht in gen2Animation.RunTimeData.InheritenceListBbaaaa)
+            foreach(var gen2inht in gen2Animation.RunTimeData.InheritenceList)
             {
                 var newInherit = new ModelAnimationGraph.Inheritance()
                 {
@@ -426,7 +426,7 @@ namespace TagTool.Porting.Gen2
             }
 
             //convert weapon list
-            foreach(var gen2weaponlist in gen2Animation.RunTimeData.WeaponListBbaaaa)
+            foreach(var gen2weaponlist in gen2Animation.RunTimeData.WeaponList)
             {
                 Animation.WeaponList.Add(new ModelAnimationGraph.WeaponListBlock
                 {

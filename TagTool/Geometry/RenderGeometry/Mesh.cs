@@ -318,7 +318,7 @@ namespace TagTool.Geometry
     /// </summary>
     [TagStructure(Size = 0x48, MaxVersion = Halo2PC)]
     [TagStructure(Size = 0x10, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Size = 0x14, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnlineED)]
+    [TagStructure(Size = 0x14, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnlineED_END)]
     [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
     [TagStructure(Size = 0x18, MinVersion = CacheVersion.HaloReach)]
     public class Part : TagStructure
@@ -490,7 +490,7 @@ namespace TagTool.Geometry
     /// A subpart of a mesh which can be rendered selectively.
     /// </summary>
     [TagStructure(Size = 0x8, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Size = 0xC, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnlineED)]
+    [TagStructure(Size = 0xC, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnlineED_END)]
     [TagStructure(Size = 0x8, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
     [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloReach)]
     public class SubPart : TagStructure

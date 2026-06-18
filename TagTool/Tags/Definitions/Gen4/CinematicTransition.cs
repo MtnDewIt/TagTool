@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
+using TagTool.Audio;
 
 namespace TagTool.Tags.Definitions.Gen4
 {
@@ -45,86 +46,12 @@ namespace TagTool.Tags.Definitions.Gen4
             [TagStructure(Size = 0xC)]
             public class CinematicTransitionSoundClassGainBlockStruct : TagStructure
             {
-                public SoundClassEnum Class;
+                [TagField(EnumType = typeof(sbyte))]
+                public SoundClass Class;
                 [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
                 public byte[] Padding;
                 public float Gain; // dB
                 public int Time; // hs_ticks
-                
-                public enum SoundClassEnum : sbyte
-                {
-                    ProjectileImpact,
-                    ProjectileDetonation,
-                    ProjectileFlyby,
-                    ProjectileDetonationLod,
-                    WeaponFire,
-                    WeaponReady,
-                    WeaponReload,
-                    WeaponEmpty,
-                    WeaponCharge,
-                    WeaponOverheat,
-                    WeaponIdle,
-                    WeaponMelee,
-                    WeaponAnimation,
-                    ObjectImpacts,
-                    ParticleImpacts,
-                    WeaponFireLod,
-                    WaterTransitions,
-                    LowpassEffects,
-                    UnitFootsteps,
-                    UnitDialog,
-                    UnitAnimation,
-                    UnitUnused,
-                    VehicleCollision,
-                    VehicleEngine,
-                    VehicleAnimation,
-                    VehicleEngineLod,
-                    DeviceDoor,
-                    DeviceUnused0,
-                    DeviceMachinery,
-                    DeviceStationary,
-                    DeviceUnused1,
-                    DeviceUnused2,
-                    Music,
-                    AmbientNature,
-                    AmbientMachinery,
-                    AmbientStationary,
-                    HugeAss,
-                    ObjectLooping,
-                    CinematicMusic,
-                    UnknownUnused0,
-                    UnknownUnused1,
-                    AmbientFlock,
-                    NoPad,
-                    NoPadStationary,
-                    EquipmentEffect,
-                    MissionDialog,
-                    CinematicDialog,
-                    ScriptedCinematicFoley,
-                    GameEvent,
-                    Ui,
-                    Test,
-                    MultiplayerDialog,
-                    AmbientNatureDetails,
-                    AmbientMachineryDetails,
-                    InsideSurroundTail,
-                    OutsideSurroundTail,
-                    VehicleDetonation,
-                    AmbientDetonation,
-                    FirstPersonInside,
-                    FirstPersonOutside,
-                    FirstPersonAnywhere,
-                    SpaceProjectileDetonation,
-                    SpaceProjectileFlyby,
-                    SpaceVehicleEngine,
-                    SpaceWeaponFire,
-                    PlayerVoiceTeam,
-                    PlayerVoiceProxy,
-                    ProjectileImpactPostpone,
-                    UnitFootstepsPostpone,
-                    WeaponReadyThirdPerson,
-                    UiMusic
-                }
             }
             
             [TagStructure(Size = 0x10)]

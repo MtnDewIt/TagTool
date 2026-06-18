@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using TagTool.Cache;
 using TagTool.Commands.Common;
@@ -16,7 +15,7 @@ namespace TagTool.Commands
 {
     public static class Program
     {
-        public static string TagToolDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        const string AutoExecFileName = "autoexec.cmds";
 
         static int Main(string[] args)
         {
@@ -29,7 +28,7 @@ namespace TagTool.Commands
             Log.AddHandler(new RunMetricsLogHandler());
             Log.Level = LogLevel.Info; // TODO: set via command line
 
-            Console.SetOut(new AnsiWriter(Console.Out));
+            AnsiConsole.Initialize();
             ConsoleHistory.Initialize();
 
             var assembly = Assembly.GetExecutingAssembly();
@@ -75,7 +74,7 @@ namespace TagTool.Commands
                 if (File.Exists(defaultCacheFilePath))
                 {
                     cacheFilePath = defaultCacheFilePath;
-                    autoExecLines = autoExecLines[1..];
+                    autoExecLines[0] = $"// {autoExecLines[0]}"; // comment it out to preserve line numbers
                 }
             }
             else
@@ -195,7 +194,7 @@ namespace TagTool.Commands
 
         private static string[] ReadAutoExecFile()
         {
-            string autoExecFilePath = Path.Combine(TagToolDirectory, "autoexec.cmds");
+            string autoExecFilePath = Path.Combine(DirectoryPaths.Base, AutoExecFileName);
             if (!File.Exists(autoExecFilePath))
                 return [];
 
@@ -233,19 +232,15 @@ namespace TagTool.Commands
 
         private static bool RunAutoExecFile(CommandRunner commandRunner, string[] commands)
         {
-            // TODO: make this use CommandRunner.RunCommandScript
-            foreach (string line in commands)
-            {
-                if (commandRunner.EOF)
-                    break;
+            var reader = new StringReader(string.Join(Environment.NewLine, commands));
 
-                object result = commandRunner.RunCommand(line);
-                if (result is TagToolError error)
-                {
-                    Log.Error(error.Message);
-                    return false;
-                }
+            object result = commandRunner.RunCommandScript(AutoExecFileName, reader);
+            if (result is TagToolError error)
+            {
+                Log.Error(error.Message);
+                return false;
             }
+
             return true;
         }
 

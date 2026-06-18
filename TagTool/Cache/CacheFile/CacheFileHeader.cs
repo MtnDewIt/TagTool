@@ -72,45 +72,15 @@ namespace TagTool.Cache
                 return adapter;
             }
 
-            switch (version)
+            return CacheVersionDetection.GetGeneration(version) switch
             {
-                case CacheVersion.HaloPC:
-                case CacheVersion.HaloXbox:
-                case CacheVersion.HaloCustomEdition:
-                    return deserializer.Deserialize<CacheFileHeaderGen1>(dataContext);
-                case CacheVersion.Halo2Alpha:
-                case CacheVersion.Halo2Beta:
-                case CacheVersion.Halo2Xbox:
-                case CacheVersion.Halo2PC:
-                    return deserializer.Deserialize<CacheFileHeaderGen2>(dataContext);
-                case CacheVersion.Halo3Beta:
-                case CacheVersion.Halo3Retail:
-                case CacheVersion.Halo3ODST:
-                case CacheVersion.HaloReach:
-                    return deserializer.Deserialize<CacheFileHeaderGen3>(dataContext);
-                case CacheVersion.HaloOnlineED:
-                case CacheVersion.HaloOnline106708:
-                case CacheVersion.HaloOnline235640:
-                case CacheVersion.HaloOnline301003:
-                case CacheVersion.HaloOnline327043:
-                case CacheVersion.HaloOnline372731:
-                case CacheVersion.HaloOnline416097:
-                case CacheVersion.HaloOnline430475:
-                case CacheVersion.HaloOnline454665:
-                case CacheVersion.HaloOnline449175:
-                case CacheVersion.HaloOnline498295:
-                case CacheVersion.HaloOnline530605:
-                case CacheVersion.HaloOnline532911:
-                case CacheVersion.HaloOnline554482:
-                case CacheVersion.HaloOnline571627:
-                case CacheVersion.HaloOnline604673:
-                case CacheVersion.HaloOnline700123:
-                    return deserializer.Deserialize<CacheFileHeaderGenHaloOnline>(dataContext);
-                case CacheVersion.Halo4:
-                case CacheVersion.H2AMP:
-                    return deserializer.Deserialize<CacheFileHeaderGen4>(dataContext);
-            }
-            return null;
+                CacheGeneration.First => deserializer.Deserialize<CacheFileHeaderGen1>(dataContext),
+                CacheGeneration.Second => deserializer.Deserialize<CacheFileHeaderGen2>(dataContext),
+                CacheGeneration.Third => deserializer.Deserialize<CacheFileHeaderGen3>(dataContext),
+                CacheGeneration.HaloOnline => deserializer.Deserialize<CacheFileHeaderGenHaloOnline>(dataContext),
+                CacheGeneration.Fourth => deserializer.Deserialize<CacheFileHeaderGen4>(dataContext),
+                _ => null,
+            };
         }
 
         public abstract Tag GetHeadTag();

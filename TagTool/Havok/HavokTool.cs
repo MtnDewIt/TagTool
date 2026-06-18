@@ -10,7 +10,7 @@ namespace TagTool.Havok
         {
             var pi = new ProcessStartInfo()
             {
-                FileName = Path.GetFullPath(Path.Combine(Program.TagToolDirectory, "Tools", "mopp.exe")),
+                FileName = Path.GetFullPath(Path.Combine(DirectoryPaths.Tools, "mopp.exe")),
                 Arguments = $"{command} {args}",
                 UseShellExecute = false,
                 CreateNoWindow = true,

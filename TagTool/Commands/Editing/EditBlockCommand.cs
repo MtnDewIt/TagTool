@@ -86,7 +86,7 @@ namespace TagTool.Commands.Editing
             if (structureAttribute != null)
             {
                 if (args.Count != 1)
-                    return new TagToolError(CommandError.ArgCount, "");
+                    return new TagToolError(CommandError.ArgCount);
 
                 blockValue = field.GetValue(Owner);
                 contextName = $"{blockName}";

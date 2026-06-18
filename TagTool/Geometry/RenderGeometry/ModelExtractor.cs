@@ -797,9 +797,9 @@ namespace TagTool.Geometry
                 bone.Name = CacheContext.StringTable.GetString(node.Name);
                 
                 bone.OffsetMatrix = new Matrix4x4(
-                    node.InverseForward.I, node.InverseLeft.I, node.InverseUp.I, node.InversePosition.X,
-                    node.InverseForward.J, node.InverseLeft.J, node.InverseUp.J, node.InversePosition.Y,
-                    node.InverseForward.K, node.InverseLeft.K, node.InverseUp.K, node.InversePosition.Z,
+                    node.Inverse.Forward.I, node.Inverse.Left.I, node.Inverse.Up.I, node.Inverse.Position.X,
+                    node.Inverse.Forward.J, node.Inverse.Left.J, node.Inverse.Up.J, node.Inverse.Position.Y,
+                    node.Inverse.Forward.K, node.Inverse.Left.K, node.Inverse.Up.K, node.Inverse.Position.Z,
                     0, 0, 0, 1);
 
                 mesh.Bones.Add(bone);

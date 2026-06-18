@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Numerics;
+using System.Threading.Tasks;
 using TagTool.Bitmaps;
 using TagTool.Bitmaps.Utils;
 using TagTool.Cache;
@@ -55,22 +56,53 @@ namespace TagTool.Porting.Gen2
                 newBitmap.Sequences.Add(newSeq);
             }
 
-            //convert images
-            foreach (var gen2Img in gen2Bitmap.Bitmaps)
+            var converterOptions = new BitmapConverterGen2.ConverterOptions()
             {
-                byte[] rawBitmapData = BitmapConverterGen2.ConvertBitmapData((GameCacheGen2)BlamCache, gen2Bitmap, gen2Img);
-                Bitmap.Image newImg = BitmapConverterGen2.ConvertBitmapImage((GameCacheGen2)BlamCache, gen2Img, rawBitmapData);
-                BaseBitmap bitmapbase = new BaseBitmap(newImg);
-                bitmapbase.Data = rawBitmapData;
+                ForceDxt5nm = Options.UseExperimentalDxt5nm,
+                HqNormalMapCompression = Options.HqNormalMapConversion
+            };
 
-                BitmapConverterGen2.PostprocessBitmap(bitmapbase, gen2Bitmap, newImg, gen2TagName);
+            var tasks = new List<Task<(BaseBitmap, Bitmap.Image)>>();
 
-                var bitmapResourceDefinition = BitmapUtils.CreateBitmapTextureInteropResource(bitmapbase);
-                var resourceReference = CacheContext.ResourceCache.CreateBitmapResource(bitmapResourceDefinition);
-                newBitmap.HardwareTextures.Add(resourceReference);
+            //convert images
+            for (var i = 0; i < gen2Bitmap.Bitmaps.Count; i++)
+            {
+                var gen2Img = gen2Bitmap.Bitmaps[i];
 
-                newBitmap.Images.Add(newImg);
+                int index = i;
+                tasks.Add(RunOnThreadPool(() =>
+                {
+                    BaseBitmap bitmapbase = BitmapConverterGen2.ConvertBitmap(
+                        (GameCacheGen2)BlamCache,
+                        gen2Bitmap,
+                        index,
+                        out Bitmap.Image newImg,
+                        gen2TagName,
+                        forDDS: false,
+                        converterOptions
+                        );
+
+                    return (bitmapbase, newImg);
+                }));
             }
+
+            AddTask(Task.WhenAll(tasks)
+                .ContinueWith(task =>
+                {
+                    // on main thread: Finish bitmap conversion
+
+                    for (int i = 0; i < gen2Bitmap.Bitmaps.Count; i++)
+                    {
+                        (BaseBitmap bitmapbase, Bitmap.Image newImg) = tasks[i].GetAwaiter().GetResult();
+
+                        var bitmapResourceDefinition = BitmapUtils.CreateBitmapTextureInteropResource(bitmapbase);
+                        var resourceReference = CacheContext.ResourceCache.CreateBitmapResource(bitmapResourceDefinition);
+                        newBitmap.HardwareTextures.Add(resourceReference);
+
+                        newBitmap.Images.Add(newImg);
+                    }
+
+                }, MainThreadScheduler));
 
             //set scope mask data to make shit work
             if (gen2TagName.Contains("scope_masks"))
@@ -95,6 +127,7 @@ namespace TagTool.Porting.Gen2
                     RegistrationPoint = new RealPoint2d { X = 0, Y = 0 },
                 });
             }
+
             return newBitmap;
         }
     }

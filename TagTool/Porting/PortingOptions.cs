@@ -35,5 +35,8 @@ namespace TagTool.Porting
 
         [Description("Enables the fix for vehicle_test_seat_list & vehicle_test_seat (requires dll changes)")]
         public bool EnableH3VehicleTestSeat = false;
+
+        [Description("Enables bitmap format optimization to reduce cache sizes")]
+        public bool BitmapFormatOptimization = true;
     }
 }

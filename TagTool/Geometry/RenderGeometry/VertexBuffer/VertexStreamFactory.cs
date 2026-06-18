@@ -1,5 +1,6 @@
 using TagTool.Cache;
 using System.IO;
+using System;
 
 namespace TagTool.Geometry
 {
@@ -18,45 +19,15 @@ namespace TagTool.Geometry
             {
                 return new VertexStreamHalo3RetailMCC(stream);
             }
-            else
+       
+            return version switch
             {
-                switch (version)
-                {
-                    case CacheVersion.Halo3Beta:
-                    case CacheVersion.Halo3Retail:
-                    case CacheVersion.Halo3ODST:
-                        return new VertexStreamXbox(stream);
-                    case CacheVersion.HaloOnlineED:
-                    case CacheVersion.HaloOnline106708:
-                        return new VertexStreamMS23(stream);
-                    case CacheVersion.HaloOnline235640:
-                    case CacheVersion.HaloOnline301003:
-                    case CacheVersion.HaloOnline327043:
-                    case CacheVersion.HaloOnline372731:
-                    case CacheVersion.HaloOnline416097:
-                    case CacheVersion.HaloOnline430475:
-                    case CacheVersion.HaloOnline449175:
-                    case CacheVersion.HaloOnline454665:
-                    case CacheVersion.HaloOnline498295:
-                    case CacheVersion.HaloOnline530605:
-                    case CacheVersion.HaloOnline532911:
-                    case CacheVersion.HaloOnline554482:
-                    case CacheVersion.HaloOnline571627:
-                    case CacheVersion.HaloOnline604673:
-                    case CacheVersion.HaloOnline700123:
-                        return new VertexStreamMS25(stream);
-
-                    case CacheVersion.HaloReach:
-                    case CacheVersion.HaloReach11883:
-                    case CacheVersion.Halo4:
-                        return new VertexStreamReach(stream);
-
-                    default:
-                        return new VertexStreamMS23(stream);
-                }
-
-            }
-            
+                CacheVersion.Halo3Beta or CacheVersion.Halo3Retail or CacheVersion.Halo3ODST => new VertexStreamXbox(stream),
+                >= CacheVersion.HaloOnlineED and <= CacheVersion.HaloOnline106708 => new VertexStreamMS23(stream),
+                >= CacheVersion.HaloOnline235640 and <= CacheVersion.HaloOnline700123 => new VertexStreamMS25(stream),
+                >= CacheVersion.HaloReach => new VertexStreamReach(stream),
+                _ => throw new NotSupportedException($"Unsupported version {version}"),
+            };
         }
     }
 }

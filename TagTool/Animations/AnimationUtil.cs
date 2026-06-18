@@ -8,17 +8,8 @@ using static TagTool.Tags.Definitions.ModelAnimationGraph;
 
 namespace TagTool.Animations
 {
-    public class JmadHelper
+    public static class AnimationUtil
     {
-        private GameCache Cache;
-        private ModelAnimationGraph Definition;
-
-        public JmadHelper(GameCache cache, ModelAnimationGraph jmad)
-        {
-            Cache = cache;
-            Definition = jmad;
-        }
-
         //
         // root node
         //
@@ -28,9 +19,6 @@ namespace TagTool.Animations
 
         public static int GetRootNodeIndex(ModelAnimationGraph jmad)
             => jmad.SkeletonNodes.FindIndex(x => x.ParentNodeIndex == -1);
-
-        public SkeletonNode GetRootNode() => GetRootNode(Definition);
-        public int GetRootNodeIndex() => GetRootNodeIndex(Definition);
 
         //
         // animations
@@ -48,12 +36,39 @@ namespace TagTool.Animations
         public static ModelAnimationGraph.Animation GetAnimation(ModelAnimationGraph jmad, StringId id)
             => jmad.Animations.FirstOrDefault(x => x.Name == id);
 
-        public ModelAnimationGraph.Animation GetAnimation(string name)
-            => GetAnimation(Definition, name, Cache);
+        public static bool TryParseAnimationIndex(ModelAnimationGraph jmad, string input, out int index)
+            => input.TryParseValidIndex(jmad.Animations?.Count, out index);
 
-        public ModelAnimationGraph.Animation GetAnimation(StringId id)
-            => GetAnimation(Definition, id);
+        public static bool TryFindAnimationIndex(ModelAnimationGraph jmad, GameCache cache, string name, out int index)
+        {
+            string formatted = name.ToLower().Replace(' ', ':');
+            index = jmad.Animations?.FindIndex(n => cache.StringTable.GetString(n.Name) == formatted) ?? -1;
+            return index != -1;
+        }
 
+        // Gen2
+
+        public static bool TryParseAnimationIndexGen2(Tags.Definitions.Gen2.ModelAnimationGraph jmad, string input, out int index)
+            => input.TryParseValidIndex(jmad.Resources.Animations?.Count, out index);
+
+        public static bool TryFindAnimationIndexGen2(Tags.Definitions.Gen2.ModelAnimationGraph jmad, GameCache cache, string name, out int index)
+        {
+            string formatted = name.ToLower().Replace(' ', ':');
+            index = jmad.Resources.Animations?.FindIndex(n => cache.StringTable.GetString(n.Name) == formatted) ?? -1;
+            return index != -1;
+        }
+
+        // Gen4
+
+        public static bool TryParseAnimationIndexGen4(Tags.Definitions.Gen4.ModelAnimationGraph jmad, string input, out int index)
+            => input.TryParseValidIndex(jmad.Definitions.Animations?.Count, out index);
+
+        public static bool TryFindAnimationIndexGen4(Tags.Definitions.Gen4.ModelAnimationGraph jmad, GameCache cache, string name, out int index)
+        {
+            string formatted = name.ToLower().Replace(' ', ':');
+            index = jmad.Definitions.Animations?.FindIndex(n => cache.StringTable.GetString(n.Name) == formatted) ?? -1;
+            return index != -1;
+        }
 
         //
         // traversal
@@ -101,27 +116,7 @@ namespace TagTool.Animations
         }
 
         public static List<StringId> GetLabelStringIDs(string name, GameCache cache)
-        {
-            List<StringId> labels = new List<StringId> { };
-            var split = name.Split(':');
-            foreach (var s in split)
-            {
-                var temp = cache.StringTable.GetStringId(s);
-                if (temp == StringId.Invalid)
-                {
-                    labels.Add(temp);
-                    return labels;
-                }
-                else
-                    labels.Add(temp);
-            }
-
-            return labels;
-        }
-
-        public object TraverseGraph(string name, bool additive = false) => TraverseGraph(Definition, name, Cache, additive);
-        public List<StringId> GetLabelStringIDs(string name) => GetLabelStringIDs(name, Cache);
-
+            => name.Split(':').Select(s => cache.StringTable.GetStringId(s)).ToList();
         //
         // inheritance
         //
@@ -252,7 +247,7 @@ namespace TagTool.Animations
             if (labels.Count != 4)
                 return AnimationSetEntryType.Invalid;
 
-            var parent = (Mode.WeaponClassBlock.WeaponTypeBlock)TraverseGraph(jmad, labels.GetRange(0, 3));
+            var parent = (Mode.WeaponClassBlock.WeaponTypeBlock)TraverseGraph(jmad, labels);
 
             if (parent != null)
             {
@@ -265,9 +260,6 @@ namespace TagTool.Animations
 
             return AnimationSetEntryType.Invalid;
         }
-
-        public AnimationSetEntryType GetEntryType(List<StringId> labels)
-            => GetEntryType(Definition, labels);
 
         public enum AnimationSetEntryType
         {

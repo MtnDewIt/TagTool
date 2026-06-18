@@ -20,7 +20,7 @@ namespace TagTool.Common
 
             using (var file = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
-                file.Read(bytes, 0, bytes.Length);
+                var _ = file.Read(bytes, 0, bytes.Length);
             }
 
             var headerPos = BitConverter.ToInt32(bytes, peHeaderOffset);

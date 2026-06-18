@@ -7,6 +7,7 @@ namespace TagTool.Commands.Common
         None,
         CustomError,
         CmdScriptError, // internal use only
+        CmdNotFound,
         ArgCount,
         ArgInvalid,
         OperationFailed,
@@ -28,7 +29,7 @@ namespace TagTool.Commands.Common
         public readonly CommandError Error;
         public readonly string Message;
 
-        public TagToolError(CommandError cmdError, string customMessage = "")
+        public TagToolError(CommandError cmdError, string customMessage = null)
         {
             Error = cmdError;
             Message = FormatErrorMessage(Error, customMessage);
@@ -39,13 +40,20 @@ namespace TagTool.Commands.Common
             bool showHelpMessage = false;
             string output = "";
 
+            string checkedMsg = string.IsNullOrEmpty(customMessage)
+                ? $"[{cmdError} without message!]"
+                : customMessage;
+
             if (cmdError == CommandError.CmdScriptError)
-                return customMessage;
+                return checkedMsg;
 
             if (cmdError != CommandError.CustomError)
             {
                 switch (cmdError)
                 {
+                    case CommandError.CmdNotFound:
+                        output += "Unrecognized command. Use \"help\" to list available commands";
+                        break;
                     case CommandError.ArgCount:
                         output += "Incorrect amount of arguments supplied";
                         showHelpMessage = true;
@@ -85,15 +93,10 @@ namespace TagTool.Commands.Common
                         break;
                 }
             }
+            else
+                return checkedMsg;
 
-            bool hasCustomMessage = !string.IsNullOrEmpty(customMessage);
-
-            if (cmdError == CommandError.CustomError && hasCustomMessage)
-            {
-                output = customMessage;
-                showHelpMessage = false;
-            }
-            else if (hasCustomMessage)
+            if (customMessage is not null)
                 output += $"\n> {customMessage}";
 
             if (showHelpMessage)

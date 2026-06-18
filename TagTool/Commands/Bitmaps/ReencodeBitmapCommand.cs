@@ -66,7 +66,7 @@ namespace TagTool.Commands.Bitmaps
             Bitmap.Image image = bitmap.Images[imageIndex];
 
             // for d3d9 dxn mips need to be >= 4x4 to avoid crashes
-            int mipCount = image.Format == BitmapFormat.Dxn
+            int mipCount = destFormat == BitmapFormat.Dxn
                 ? BitmapUtils.GetMipmapCountTruncate(image.Width, image.Height, 4, 4)
                 : BitmapUtils.GetMipmapCount(image.Width, image.Height);
 

@@ -19,12 +19,24 @@ namespace TagTool.Porting.Gen3
     {
         private LensFlare ConvertLensFlare(LensFlare lensFlare, Stream cacheStream, Stream blamCacheStream)
         {
-            lensFlare.OcclusionReflectionIndex = 0;
+            bool isLegacyFlare = (BlamCache.Version != CacheVersion.Halo3Retail || BlamCache.Platform != CachePlatform.MCC) && BlamCache.Version < CacheVersion.HaloOnlineED;
+
+            if (isLegacyFlare)
+            {
+                lensFlare.OcclusionReflectionIndex = 0;
+                lensFlare.Flags |= LensFlare.LensFlareFlags.RotateOcclusionTestingBoxWithLensFlare;
+                lensFlare.Flags |= LensFlare.LensFlareFlags.NoReflectionOpacityFeedback;
+            }
 
             // TO DO: verify reach conversions
 
             foreach (var reflection in lensFlare.Reflections)
             {
+                if (isLegacyFlare)
+                {
+                    reflection.Flags |= LensFlare.Reflection.ReflectionFlags.UseLegacyH3FlaresSystem;
+                }
+
                 // only H3Original and ODST have Rotation after Axis Offset
                 // ODST: counterclockwise rotation starting from alt axis
                 if (BlamCache.Version == CacheVersion.Halo3ODST)
@@ -330,7 +342,10 @@ namespace TagTool.Porting.Gen3
                 }
             }
 
-            // convert main structure (recursive)
+            //convert main structure (recursive)
+            Lbsp.LightmapDominantLightDirectionBitmap = null; // don't convert the bitmaps
+            Lbsp.LightmapSHCoefficientsBitmap = null;
+
             Lbsp = ConvertStructure(cacheStream, blamCacheStream, Lbsp, blamTagName, blamTagName);
 
             //
@@ -339,16 +354,8 @@ namespace TagTool.Porting.Gen3
 
             if (convertedLightmap != null)
             {
-                // can't async bitmaps here... only pending should be the lightmaps anyway as they are the first tagref ported from a scenario
-                WaitForTag(Lbsp.LightmapSHCoefficientsBitmap);
-                WaitForTag(Lbsp.LightmapDominantLightDirectionBitmap);
-
-                Lbsp.LightmapSHCoefficientsBitmap.Name = $"{LbspTag.Name}_16f_lp_array_dxt5";
-                Lbsp.LightmapDominantLightDirectionBitmap.Name = $"{LbspTag.Name}_16f_lp_array_intensity_dxt5";
-
-                convertedLightmap.ImportIntoLbsp(CacheContext, cacheStream, Lbsp);
+                convertedLightmap.ImportIntoLbsp(CacheContext, cacheStream, Lbsp, LbspTag.Name);
             }
-
 
             //
             // convert tag light probes

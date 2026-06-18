@@ -22,7 +22,9 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public ObjectDefinitionSecondaryFlags SecondaryFlagsReach;
 
-        public ObjectDefinitionFlags ObjectFlags;
+        [TagField(EnumType = typeof(ushort), MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(EnumType = typeof(uint), MinVersion = CacheVersion.HaloReach)]
+        public BitFlags<ObjectDefinitionFlags> ObjectFlags;
 
         [TagField(Platform = CachePlatform.MCC, MinVersion = CacheVersion.HaloReach)]
         public int RuntimeFlagsReachMCC;
@@ -150,7 +152,6 @@ namespace TagTool.Tags.Definitions
 
         public enum SweetenerSizeValue : sbyte
         {
-            Default,
             Small,
             Medium,
             Large
@@ -859,111 +860,36 @@ namespace TagTool.Tags.Definitions
         public ObjectTypeFlagsHaloOnline HaloOnline;
     }
 
-    [Flags]
-    public enum ObjectFlagsReach : int
+    [TagEnum(IsVersioned = true)]
+    public enum ObjectDefinitionFlags
     {
-        None = 0,
-        DoesNotCastShadow = 1 << 0,
-        SearchCardinalDirectionLightmapsOnFailure = 1 << 1,
-        PreservesInitialDamageOwner = 1 << 2,
-        NotAPathfindingObstacle = 1 << 3,
-        ExtensionOfParent = 1 << 4,
-        DoesNotCauseCollisionDamage = 1 << 5,
-        EarlyMover = 1 << 6,
-        EarlyMoverLocalizedPhysics = 1 << 7,
-        UseStaticMassiveLightmapSample = 1 << 8,
-        ObjectScalesAttachments = 1 << 9,
-        InheritsPlayersAppearance = 1 << 10,
-        NonPhysicalInMapEditor = 1 << 11,
-        AttachToClustersByDynamicSphere = 1 << 12,
-        EffectsDoNotSpawnObjectsInMultiplayer = 1 << 13,
-        DoesNotCollideWithCamera = 1 << 14,
-        DamageNotBlockedByObstructions = 1 << 15
-    }
-
-    [TagStructure(Size = 0x2, MaxVersion = CacheVersion.HaloOnline700123)]
-    [TagStructure(Size = 0x4, MinVersion = CacheVersion.HaloReach)]
-    public class ObjectDefinitionFlags : VersionedFlags
-    {
-        [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
-        public ObjectFlags Flags;
-
-        [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
-        public ObjectFlagsMCC FlagsMCC;
-
-        [TagField(MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
-        public ObjectFlagsReach FlagsReach;
-
-        [TagField(MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
-        public ObjectFlagsReachMCC FlagsReachMCC;
-    }
-
-    [Flags]
-    public enum ObjectFlagsMCC : ushort
-    {
-        DoesNotCastShadow = 1 << 0,
-        SearchCardinalDirectionLightmapsOnFailure = 1 << 1,
-        PreservesInitialDamageOwner = 1 << 2,
-        NotAPathfindingObstacle = 1 << 3,
-        // object passes all function values to parent and uses parent's markers
-        ExtensionOfParent = 1 << 4,
-        DoesNotCauseCollisionDamage = 1 << 5,
-        EarlyMover = 1 << 6,
-        EarlyMoverLocalizedPhysics = 1 << 7,
-        ObjectScalesAttachments = 1 << 8,
-        NonPhysicalInMapEditor = 1 << 9,
-        // use this for the mac gun on spacestation
-        AttachToClustersByDynamicSphere = 1 << 10,
-        EffectsDoNotSpawnObjectsInMultiplayer = 1 << 11,
-        // specificly the flying observer camera
-        DoesNotCollideWithCamera = 1 << 12,
-        // AOE damage being applied to this object does not test for obstrutions.
-        DamageNotBlockedByObstructions = 1 << 13
-    }
-
-    [Flags]
-    public enum ObjectFlagsReachMCC : int
-    {
-        None = 0,
-        DoesNotCastShadow = 1 << 0,
-        SearchCardinalDirectionLightmapsOnFailure = 1 << 1,
-        PreservesInitialDamageOwner = 1 << 2,
-        NotAPathfindingObstacle = 1 << 3,
-        ExtensionOfParent = 1 << 4,
-        DoesNotCauseCollisionDamage = 1 << 5,
-        EarlyMover = 1 << 6,
-        EarlyMoverLocalizedPhysics = 1 << 7,
-        ObjectScalesAttachments = 1 << 8,
-        AttachToClustersByDynamicSphere = 1 << 9,
-        SampleEnvironmentLightingOnlyIgnoreObjectLighting = 1 << 10,
-        EffectsDoNotSpawnObjectsInMultiplayer = 1 << 11,
-        DoesNotCollideWithCamera = 1 << 12,
-        ForceCollideWithCamera = 1 << 13,
-        DamageNotBlockedByObstructions = 1 << 14,
-        DoesNotDamageBreakableSurfaces = 1 << 15,
-        DamageNonNetworkedChildrenOnDistributedClientOnObjectDeath = 1 << 16
-    }
-
-    [Flags]
-    public enum ObjectFlags : ushort
-    {
-        None = 0,
-        DoesNotCastShadow = 1 << 0,
-        SearchCardinalDirectionLightmapsOnFailure = 1 << 1,
-        PreservesInitialDamageOwner = 1 << 2,
-        NotAPathfindingObstacle = 1 << 3,
-        ExtensionOfParent = 1 << 4, // object passes all function values to parent and uses parent's markers
-        DoesNotCauseCollisionDamage = 1 << 5,
-        EarlyMover = 1 << 6,
-        EarlyMoverLocalizedPhysics = 1 << 7,
-        UseStaticMassiveLightmapSample = 1 << 8,
-        ObjectScalesAttachments = 1 << 9,
-        InheritsPlayersAppearance = 1 << 10,
-        NonPhysicalInMapEditor = 1 << 11, // formerly DeadBipedsCantLocalize, which was probably incorrect
-        AttachToClustersByDynamicSphere = 1 << 12, // use this for the mac gun on spacestation
-        EffectsDoNotSpawnObjectsInMultiplayer = 1 << 13,
-        DoesNotCollideWithCamera = 1 << 14, // specifically the flying observer camera
-        DamageNotBlockedByObstructions = 1 << 15 // AOE damage being applied to this object does not test for obstrutions.
+        DoesNotCastShadow,
+        SearchCardinalDirectionLightmapsOnFailure,
+        PreservesInitialDamageOwner,
+        NotAPathfindingObstacle,
+        ExtensionOfParent, // object passes all function values to parent and uses parent's markers
+        DoesNotCauseCollisionDamage,
+        EarlyMover,
+        EarlyMoverLocalizedPhysics,
+        [TagEnumMember(Platform = CachePlatform.Original)]
+        UseStaticMassiveLightmapSample, // cast a fukton of rays once and store the results for lighting
+        ObjectScalesAttachments,
+        [TagEnumMember(Platform = CachePlatform.Original)]
+        InheritsPlayersAppearance,
+        NonPhysicalInMapEditor,
+        [TagEnumMember(MaxVersion = CacheVersion.HaloOnline700123)]
+        AttachToClustersByDynamicSphere, // use this for the mac gun on spacestation
+        [TagEnumMember(MinVersion = CacheVersion.HaloReach)]
+        ObjectIsAlwaysOnTheCeiling,
+        [TagEnumMember(MinVersion = CacheVersion.HaloReach)]
+        SampleEnviromentLightingOnly,
+        EffectsDoNotSpawnObjectsInMultiplayer,
+        DoesNotCollideWithCamera, // specifically the flying observer camera
+        [TagEnumMember(MinVersion = CacheVersion.HaloReach)]
+        ForceCollideWithCamera,
+        DamageNotBlockedByObstructions,
+        [TagEnumMember(MinVersion = CacheVersion.HaloReach)]
+        DoesNotDamageBreakableSurfaces // AOE damage being applied to this object does not test for obstrutions.
     }
 
     [Flags]

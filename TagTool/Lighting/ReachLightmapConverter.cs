@@ -25,7 +25,10 @@ namespace TagTool.Lighting
             var directionBitmap = sourceCache.Deserialize<Bitmap>(sourceStream, Lbsp.LightmapSHCoefficientsBitmap);
             var intensityBitmap = sourceCache.Deserialize<Bitmap>(sourceStream, Lbsp.LightmapDominantLightDirectionBitmap);
 
-            var bitmapConverter = new BitmapConverterGen3(sourceCache);
+            var bitmapConverter = new BitmapConverterGen3(sourceCache)
+            {
+                AllowOptimization = false
+            };
             var convertedDirectionBitmap = bitmapConverter.ConvertBitmap(directionBitmap, 0, Lbsp.LightmapSHCoefficientsBitmap.Name, true);
             var convertedIntensityBitmap = bitmapConverter.ConvertBitmap(intensityBitmap, 0, Lbsp.LightmapDominantLightDirectionBitmap.Name, true);
 

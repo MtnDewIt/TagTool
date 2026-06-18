@@ -50,9 +50,9 @@ namespace TagTool.Geometry.BspCollisionGeometry
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public float GlobalLightmapResolutionScale;
 
-        [TagField(Version = CacheVersion.HaloOnlineED)]
-        public TagBlock<ExtraDataBlock> ExtraData;
-        [TagField(Length = 4, Flags = TagFieldFlags.Padding, Version = CacheVersion.HaloOnlineED)]
+		[TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnlineED_END)]
+		public TagBlock<ExtraDataBlock> ExtraData;
+        [TagField(Length = 4, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnlineED_END)]
         public byte[] Unused2;
 
         [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
@@ -78,7 +78,7 @@ namespace TagTool.Geometry.BspCollisionGeometry
             public TagBlock<PolyhedronPlaneEquation> PolyhedraPlaneEquations;
         }
 
-        [TagStructure(Size = 0x70, Align = 16, Version = CacheVersion.HaloOnlineED)]
+        [TagStructure(Size = 0x70, Align = 16, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnlineED_END)]
         [TagStructure(Size = 0x80, Align = 16, MinVersion = CacheVersion.HaloReach)]
         public class PolyhedronBlock : TagStructure
         {

@@ -38,26 +38,23 @@ namespace TagTool.Commands.Modding
             if(args.Count != 1)
                 return new TagToolError(CommandError.ArgCount);
 
-            string path = args[0];
+            string path = args[0].Trim('/', '\\');
+            if (!path.EndsWith(".pak"))
+                path += ".pak";
+            
+            var file = new FileInfo(path);
+            if (!file.Exists && string.IsNullOrEmpty(Path.GetPathRoot(path)))
+            {
+                GameCache baseCache = Cache;
+                while (baseCache is GameCacheModPackage mod)
+                    baseCache = mod.BaseCacheReference;
 
-            if (Cache.Directory != null)
-            { 
-                path = Cache.Directory.FullName;
-                path = path.Substring(0, path.Length - 4);
-
-                if (!args[0].Contains("/") && !args[0].Contains("\\"))
-                    path += "mods\\" + args[0];
-                else
-                    path = args[0];
-
-                if (!args[0].Contains(".pak"))
-                    path += ".pak";
+                string parent = baseCache.Directory.Parent.FullName;
+                file = new(Path.Combine(parent, "mods", path));
             }
 
-			var file = new FileInfo(path);
-
             if (!file.Exists)
-                return new TagToolError(CommandError.FileNotFound, $"\"{args[0]}\"");
+                return new TagToolError(CommandError.FileNotFound, $"{path}");
 
             Console.WriteLine("Initializing cache...");
 

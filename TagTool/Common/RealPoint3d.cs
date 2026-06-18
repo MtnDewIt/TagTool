@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using TagTool.Cache;
 
 namespace TagTool.Common
@@ -114,5 +115,11 @@ namespace TagTool.Common
         }
 
         public float[] ToArray() => new[] { X, Y, Z };
+
+        public static RealPoint3d CenterOf(IList<RealPoint3d> points)
+        {
+            RealPoint3d sum = points.Aggregate((total,next) => total + next);
+            return sum / points.Count;
+        }
     }
 }

@@ -102,6 +102,7 @@ namespace TagTool.Tags
         public TagEnumAttribute Attribute;
         public bool IsFlags;
         private TagEnumMemberEnumerable _members;
+        public ulong MemberMask => Members.Mask;
 
         public TagEnumMemberEnumerable Members
         {
@@ -133,7 +134,7 @@ namespace TagTool.Tags
                     throw new NotSupportedException("Versioned enums must have an underlying type of int.");
 
                 if (IsFlags)
-                    throw new NotSupportedException("C# [Flags] Enum cannot be versioned, use FlagBits<Enum> instead.");
+                    throw new NotSupportedException("C# [Flags] Enum cannot be versioned, use BitFlags<Enum> instead.");
             }
         }
 
@@ -146,6 +147,7 @@ namespace TagTool.Tags
         public readonly List<TagEnumMemberInfo> Members = [];
         public readonly List<TagEnumMemberInfo> VersionedMembers = [];
         public readonly List<int> Constants = [];
+        public ulong Mask;
 
         public TagEnumMemberEnumerable(TagEnumInfo info)
         {
@@ -164,10 +166,16 @@ namespace TagTool.Tags
                 var value = fieldInfo.GetValue(null);
                 var memberInfo = new TagEnumMemberInfo(fieldInfo, attr, value);
 
-                if ((attr.Flags & TagEnumMemberFlags.Constant) != 0)
-                    Constants.Add((int)value);
-                else
-                    VersionedMembers.Add(memberInfo);
+                if (Info.IsVersioned)
+                {
+                    if ((attr.Flags & TagEnumMemberFlags.Constant) != 0)
+                        Constants.Add((int)value);
+                    else
+                    {
+                        VersionedMembers.Add(memberInfo);
+                        Mask |= (1UL << (int)value);
+                    }
+                }
 
                 Members.Add(memberInfo);
             }

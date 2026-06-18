@@ -178,8 +178,13 @@ namespace TagTool.Porting.Gen2
                     if (part.Type != null)
                     {
                         var gen2group = part.Type.Group.Tag.ToString();
-                        if(Tag.TryParseGroupTag(CacheContext, gen2group, out newPart.RuntimeBaseGroupTag))
+                        Tag basegroupTag = new Tag();
+                        if(Tag.TryParseGroupTag(CacheContext, gen2group, out basegroupTag))
+                        {
                             newPart.Type = part.Type;
+                            if (newPart.Type.IsInGroup("obje"))
+                                newPart.RuntimeBaseGroupTag = "obje";
+                        }                           
                     }
 
                     newEvent.Parts.Add(newPart);

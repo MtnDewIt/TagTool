@@ -783,27 +783,31 @@ namespace TagTool.Tags.Definitions
                     public sbyte SkyIndex;
                 }
 
+                [TagStructure(Size = 0x30, MinVersion = CacheVersion.HaloOnlineED_072, MaxVersion = CacheVersion.HaloOnlineED_END)]
                 [TagStructure(Size = 0xC, MaxVersion = CacheVersion.HaloOnline700123)]
                 [TagStructure(Size = 0x24, MinVersion = CacheVersion.HaloReach)]
                 public class BspSeamClusterMapping : TagStructure
-				{
+                {
+                    [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+                    public List<byte> Clusters;
+
+                    [TagField(MinVersion = CacheVersion.HaloOnlineED_072, MaxVersion = CacheVersion.HaloOnlineED_END)]
                     [TagField(MinVersion = CacheVersion.HaloReach)]
                     public List<ClusterReference> RootClusters;
+
+                    [TagField(MinVersion = CacheVersion.HaloOnlineED_072, MaxVersion = CacheVersion.HaloOnlineED_END)]
                     [TagField(MinVersion = CacheVersion.HaloReach)]
                     public List<ClusterReference> AttachedClusters;
+
+                    [TagField(MinVersion = CacheVersion.HaloOnlineED_072, MaxVersion = CacheVersion.HaloOnlineED_END)]
                     [TagField(MinVersion = CacheVersion.HaloReach)]
                     public List<ClusterReference> ConnectedClusters;
 
-                    [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-                    public List<ClusterReference> Clusters;
-
-                    [TagStructure(Size = 0x1, MaxVersion = CacheVersion.HaloOnline700123)]
-                    [TagStructure(Size = 0x2, MinVersion = CacheVersion.HaloReach)]
+                    [TagStructure(Size = 0x2)]
                     public class ClusterReference : TagStructure
-					{
-                        [TagField(MinVersion = CacheVersion.HaloReach)]
+                    {
                         public sbyte BspIndex;
-                        public sbyte ClusterIndex;
+                        public byte ClusterIndex;
                     }
                 }
             }

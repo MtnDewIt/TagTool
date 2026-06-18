@@ -402,7 +402,7 @@ namespace TagTool.Porting.Gen2
 
             if (image.Flags.HasFlag(TagTool.Tags.Definitions.Gen2.Bitmap.BitmapDataBlock.FlagsValue.Swizzled))
             {
-                rawBitmapData = TagTool.Commands.Gen2.Bitmaps.BitmapConverterGen2.Swizzle(rawBitmapData, image.Width, image.Height, 1, 1, true);
+                rawBitmapData = XboxSwizzler.Swizzle(rawBitmapData, image.Width, image.Height, 1, 1, true);
             }
 
             var coefficients = new List<RealRgbColor[]>();

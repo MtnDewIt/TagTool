@@ -49,7 +49,7 @@ namespace TagTool.Audio
             FirstSample = 0;
         }
         
-        public PermutationChunk(int offset, int size, uint lastSample, uint firstSample)
+        public PermutationChunk(int offset, int size, uint firstSample, uint lastSample)
         {
             Offset = offset;
             EncodedSize = (0x3FFFFFF & size) + 0x4000000;

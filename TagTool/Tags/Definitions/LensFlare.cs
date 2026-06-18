@@ -111,11 +111,11 @@ namespace TagTool.Tags.Definitions
             NoOcclusionTest = 1 << 1,
             OnlyRenderInFirstPerson = 1 << 2,
             OnlyRenderInThirdPerson = 1 << 3,
-            NoReflectionOpacityFeedback = 1 << 4,
-            ScaleByMarker = 1 << 5,
-            DoNotAutofade = 1 << 6,
-            DoNotRenderWhileZoomed = 1 << 7,
-            UseSeparateXAndYFalloffAngles = 1 << 8
+            UseSimpleOcclusionBoxTest = 1 << 4,
+            NoReflectionOpacityFeedback = 1 << 5,
+            ScaleByMarker = 1 << 6,
+            DoNotAutofade = 1 << 7,
+            DoNotRenderWhileZoomed = 1 << 8
         }
 
         public enum RotationFunctionValue : short
@@ -224,22 +224,19 @@ namespace TagTool.Tags.Definitions
             public enum ReflectionFlags : ushort
             {
                 None = 0,
-                AlignRotationWithScreenCenter = 1 << 0,
-                RadiusNotScaledByDistance = 1 << 1,
+                RotateFromCenterOfScreen = 1 << 0,
+                RadiusScaledByDistance = 1 << 1,
                 RadiusScaledByOcclusionFactor = 1 << 2,
-                OccludedBySolidObjects = 1 << 3,
-                IgnoreLightColor = 1 << 4,
-                NotAffectedByInnerOcclusion = 1 << 5,
-                Bit6 = 1 << 6,
-                Bit7 = 1 << 7,
-                Bit8 = 1 << 8,
-                Bit9 = 1 << 9,
-                Bit10 = 1 << 10,
-                Bit11 = 1 << 11,
-                Bit12 = 1 << 12,
-                Bit13 = 1 << 13,
-                Bit14 = 1 << 14,
-                Bit15 = 1 << 15
+                IgnoreExternalColor = 1 << 3,
+                LockToFlareX = 1 << 4,
+                LockToFlareY = 1 << 5,
+                ProximityToCenterAsFunctionInput = 1 << 6,
+                MirrorAcrossFlare = 1 << 7,
+                DisabledForDebugging = 1 << 8,
+                FlipUCoordinate = 1 << 9,
+                FlipVCoordinate = 1 << 10,
+                DrawInWorldSpaceInsteadOfScreenSpace = 1 << 11, // MCC
+                UseLegacyH3FlaresSystem = 1 << 12, // MCC
             }
         }
         

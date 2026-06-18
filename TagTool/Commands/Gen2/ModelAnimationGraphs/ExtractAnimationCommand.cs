@@ -25,7 +25,7 @@ namespace TagTool.Commands.Gen2.ModelAnimationGraphs
                   "ExtractAnimation",
                   "Extract an animation to a JMA/JMM/JMO/JMR/JMW/JMZ/JMT file",
 
-                  "ExtractAnimation <index/all> <filepath>",
+                  "ExtractAnimation <name/index/all> <directory>",
 
                   "Extract an animation to a JMA/JMM/JMO/JMR/JMW/JMZ/JMT file. Use the index of the animation as the first argument or 'all' to extract all animations in this jmad.")
         {
@@ -35,42 +35,36 @@ namespace TagTool.Commands.Gen2.ModelAnimationGraphs
 
         public override object Execute(List<string> args)
         {
-            //Arguments needed: <index> <filepath>
             if (args.Count != 2)
                 return new TagToolError(CommandError.ArgCount);
 
             var argStack = new Stack<string>(args.AsEnumerable().Reverse());
 
             List<int> AnimationIndices = new List<int>();
-            var index = argStack.Pop();
-            if (index == "all")
-                AnimationIndices.AddRange(Enumerable.Range(0, Animation.Resources.AnimationsAbcdcc.Count).ToList());
-            else
-                AnimationIndices.Add(int.Parse(index));
-            string directoryarg = argStack.Pop();
 
-            if (!Directory.Exists(directoryarg))
-                return new TagToolError(CommandError.FileNotFound);
+            var input = argStack.Pop();
+
+            if (input == "all")
+            {
+                AnimationIndices.AddRange(Enumerable.Range(0, Animation.Resources.Animations.Count).ToList());
+            }
+            else if (AnimationUtil.TryParseAnimationIndexGen2(Animation, input, out int index)
+                || AnimationUtil.TryFindAnimationIndexGen2(Animation, CacheContext, input, out index))
+            {
+                AnimationIndices.Add(index);
+            }
+            else
+                return new TagToolError(CommandError.ArgInvalid, input);
+
+            string directoryarg = argStack.Pop();
 
             Console.WriteLine($"###Extracting {AnimationIndices.Count} animation(s)...");
 
             List<Node> renderModelNodes = GetNodeDefaultValues();
 
-            //fixup for h2x, get raw resource data and place it in the animation blocks
-            if (CacheContext.Version < CacheVersion.Halo2PC)
-                foreach (var animationindex in AnimationIndices)
-                {
-                    ModelAnimationGraph.AnimationGraphResourcesStructBlock.AnimationPoolBlock animationblock = Animation.Resources.AnimationsAbcdcc[animationindex];
-                    GameCacheGen2 gen2Cache = (GameCacheGen2)CacheContext;
-                    byte[] rawdata = gen2Cache.GetCacheRawData(Animation.AnimationData[animationblock.ResourceIndex].RawDataOffset, Animation.AnimationData[animationblock.ResourceIndex].DataSize);
-                    int total_animation_data_size = animationblock.DataSizes.CompressedDataSize + animationblock.DataSizes.UncompressedDataSize + animationblock.DataSizes.StaticDataSize + animationblock.DataSizes.StaticNodeFlags + animationblock.DataSizes.AnimatedNodeFlags + animationblock.DataSizes.MovementData + animationblock.DataSizes.PillOffsetData;
-                    animationblock.AnimationData = new byte[total_animation_data_size];
-                    Buffer.BlockCopy(rawdata, animationblock.ResourceBlockOffset, animationblock.AnimationData, 0, total_animation_data_size);
-                };
-
             foreach (var animationindex in AnimationIndices)
             {
-                ModelAnimationGraph.AnimationGraphResourcesStructBlock.AnimationPoolBlock animationblock = Animation.Resources.AnimationsAbcdcc[animationindex];
+                ModelAnimationGraph.AnimationGraphResourcesStructBlock.AnimationPoolBlock animationblock = Animation.Resources.Animations[animationindex];
                 AnimationResourceData animationData1 = BuildAnimationResourceData(animationblock);
 
                 string str = CacheContext.StringTable.GetString(animationblock.Name).Replace(':', ' ');
@@ -105,7 +99,7 @@ namespace TagTool.Commands.Gen2.ModelAnimationGraphs
                         animation.InsertBaseFrame();
                     }
                 }
-                Console.WriteLine($"Exporting {str}");
+                Console.WriteLine($"Exporting \"{str}\"");
                 animation.Export(fileName);
             }
             Console.WriteLine("Done!");
@@ -117,13 +111,24 @@ namespace TagTool.Commands.Gen2.ModelAnimationGraphs
             //var resourcedata = CacheContext.ResourceCache.GetModelAnimationTagResource(resourceref);
             //if (resourcedata == null)
             //    return null;
+
+            //fixup for h2x, get raw resource data and place it in the animation blocks
+            if (CacheContext.Version < CacheVersion.Halo2PC)
+            {
+                GameCacheGen2 gen2Cache = (GameCacheGen2)CacheContext;
+                byte[] rawdata = gen2Cache.GetCacheRawData(Animation.AnimationData[animationblock.ResourceIndex].RawDataOffset, Animation.AnimationData[animationblock.ResourceIndex].DataSize);
+                int total_animation_data_size = animationblock.DataSizes.CompressedDataSize + animationblock.DataSizes.UncompressedDataSize + animationblock.DataSizes.StaticDataSize + animationblock.DataSizes.StaticNodeFlags + animationblock.DataSizes.AnimatedNodeFlags + animationblock.DataSizes.MovementData + animationblock.DataSizes.PillOffsetData;
+                animationblock.AnimationData = new byte[total_animation_data_size];
+                Buffer.BlockCopy(rawdata, animationblock.ResourceBlockOffset, animationblock.AnimationData, 0, total_animation_data_size);
+            }
+
             var staticflagssize = animationblock.DataSizes.StaticNodeFlags;
             var animatedflagssize = animationblock.DataSizes.AnimatedNodeFlags;
             var staticdatasize = animationblock.DataSizes.StaticDataSize;
             AnimationResourceData data = new AnimationResourceData(
                 animationblock.FrameCount,
                 animationblock.NodeCount,
-                CalculateNodeListChecksum(Animation.Resources.SkeletonNodesAbcdcc, 0),
+                CalculateNodeListChecksum(Animation.Resources.SkeletonNodes, 0),
                 (FrameInfoType)animationblock.FrameInfoType,
                 staticflagssize,
                 animatedflagssize,
@@ -143,24 +148,24 @@ namespace TagTool.Commands.Gen2.ModelAnimationGraphs
             List<Node> NodeList = new List<Node>();
             List<RenderModel.Node> PrimaryRenderModelNodes = new List<RenderModel.Node>();
             List<RenderModel.Node> SecondaryRenderModelNodes = new List<RenderModel.Node>();
-            if (Animation.Resources.SkeletonNodesAbcdcc.Any(n => n.ModelFlags.HasFlag(ModelAnimationGraph.AnimationGraphResourcesStructBlock.AnimationGraphNodeBlock.ModelFlagsValue.PrimaryModel)))
+            if (Animation.Resources.SkeletonNodes.Any(n => n.ModelFlags.HasFlag(ModelAnimationGraph.AnimationGraphResourcesStructBlock.AnimationGraphNodeBlock.ModelFlagsValue.PrimaryModel)))
             {
-                var primarynodes = Animation.Resources.SkeletonNodesAbcdcc.Where(n => n.ModelFlags.HasFlag(ModelAnimationGraph.AnimationGraphResourcesStructBlock.AnimationGraphNodeBlock.ModelFlagsValue.PrimaryModel)).ToList();
+                var primarynodes = Animation.Resources.SkeletonNodes.Where(n => n.ModelFlags.HasFlag(ModelAnimationGraph.AnimationGraphResourcesStructBlock.AnimationGraphNodeBlock.ModelFlagsValue.PrimaryModel)).ToList();
                 PrimaryRenderModelNodes = GetRenderModelNodes(primarynodes,
-                    CalculateNodeListChecksum(Animation.Resources.SkeletonNodesAbcdcc, 0, true));
+                    CalculateNodeListChecksum(Animation.Resources.SkeletonNodes, 0, true));
                 if (PrimaryRenderModelNodes.Count < primarynodes.Count)
                     Log.Warning($"Matching primary model not found! Animation may not appear properly.");
             }
-            if (Animation.Resources.SkeletonNodesAbcdcc.Any(n => n.ModelFlags.HasFlag(ModelAnimationGraph.AnimationGraphResourcesStructBlock.AnimationGraphNodeBlock.ModelFlagsValue.SecondaryModel)))
+            if (Animation.Resources.SkeletonNodes.Any(n => n.ModelFlags.HasFlag(ModelAnimationGraph.AnimationGraphResourcesStructBlock.AnimationGraphNodeBlock.ModelFlagsValue.SecondaryModel)))
             {
-                var secondarynodes = Animation.Resources.SkeletonNodesAbcdcc.Where(n => n.ModelFlags.HasFlag(ModelAnimationGraph.AnimationGraphResourcesStructBlock.AnimationGraphNodeBlock.ModelFlagsValue.SecondaryModel)).ToList();
+                var secondarynodes = Animation.Resources.SkeletonNodes.Where(n => n.ModelFlags.HasFlag(ModelAnimationGraph.AnimationGraphResourcesStructBlock.AnimationGraphNodeBlock.ModelFlagsValue.SecondaryModel)).ToList();
                 SecondaryRenderModelNodes = GetRenderModelNodes(secondarynodes,
-                    CalculateNodeListChecksum(Animation.Resources.SkeletonNodesAbcdcc, 0, false));
+                    CalculateNodeListChecksum(Animation.Resources.SkeletonNodes, 0, false));
                 if (SecondaryRenderModelNodes.Count < secondarynodes.Count)
                     Log.Warning($"Matching secondary model not found! Animation may not appear properly.");
             }
 
-            foreach (var skellynode in Animation.Resources.SkeletonNodesAbcdcc)
+            foreach (var skellynode in Animation.Resources.SkeletonNodes)
             {
                 RenderModel.Node matchingnode = new RenderModel.Node();
                 if (skellynode.ModelFlags.HasFlag(ModelAnimationGraph.AnimationGraphResourcesStructBlock.AnimationGraphNodeBlock.ModelFlagsValue.PrimaryModel))
@@ -227,7 +232,7 @@ namespace TagTool.Commands.Gen2.ModelAnimationGraphs
         }
         public ModelAnimationGraph.AnimationGraphResourcesStructBlock.AnimationPoolBlock GetBaseAnimation(string animationName)
         {
-            var baseanims = Animation.Resources.AnimationsAbcdcc.Where(q => q.Type == 0 && q.FrameInfoType == 0);
+            var baseanims = Animation.Resources.Animations.Where(q => q.Type == 0 && q.FrameInfoType == 0);
             char separatorChar = ':';
             string[] strArray = animationName.Split(separatorChar);
             string baseAnimationPrefix = strArray.First();

@@ -46,8 +46,22 @@ namespace TagTool.Commands.Tags
             if(Cache is GameCacheHaloOnlineBase hoCache)
             {
                 byte[] data;
-                using (var stream = Cache.OpenCacheRead())
-                    data = hoCache.TagCacheGenHO.ExtractTagRaw(stream, (CachedTagHaloOnline)instance);
+
+                GameCacheHaloOnlineBase extractionCache = hoCache;
+                var cachedtagHO = (CachedTagHaloOnline)instance;
+
+                if (hoCache is GameCacheModPackage modCache && cachedtagHO.IsEmpty())
+                {
+                    extractionCache = modCache.BaseCacheReference;
+                
+                    if (!extractionCache.TagCache.TryGetTag(args[0], out instance))
+                        return new TagToolError(CommandError.TagInvalid);
+                    else
+                        cachedtagHO = (CachedTagHaloOnline)instance;
+                }
+
+                using (var stream = extractionCache.OpenCacheRead())
+                    data = extractionCache.TagCacheGenHO.ExtractTagRaw(stream, cachedtagHO);
 
                 using (var outStream = file.Create())
                 {

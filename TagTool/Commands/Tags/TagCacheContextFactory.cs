@@ -40,6 +40,7 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new SetLogLevelCommand());
             context.AddCommand(new SuppressErrorsCommand());
             context.AddCommand(new RunCommands(contextStack));
+            context.AddCommand(new RunCommand(contextStack));
             context.AddCommand(new ClearCommand());
             context.AddCommand(new ExecuteCSharpCommand(contextStack));
             context.AddCommand(new EchoCommand());
@@ -70,6 +71,7 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new TagDependencyCommand(cache));
             context.AddCommand(new GuessTagDefCommand(cache));
             context.AddCommand(new DiffTagCommand(cache, cache));
+            context.AddCommand(new ListInvalidBitmapsCommand(cache));
 
             // Halo Online Specific Commands
             if (cache is GameCacheHaloOnlineBase)
@@ -81,6 +83,7 @@ namespace TagTool.Commands.Tags
                 context.AddCommand(new ImportTagCommand(hoCache));
                 context.AddCommand(new ImportLooseTagCommand(hoCache));
                 context.AddCommand(new TagResourceCommand(hoCache));
+                context.AddCommand(new DeleteOrphanResourcesCommand(hoCache));
                 context.AddCommand(new ListUnusedTagsCommand(hoCache));
                 context.AddCommand(new ListDuplicateTagsCommand(hoCache));
                 context.AddCommand(new GetTagInfoCommand(hoCache));
@@ -120,6 +123,7 @@ namespace TagTool.Commands.Tags
                 context.AddCommand(new NameShaderTagsCommand(hoCache));
 
                 context.AddCommand(new TagResourceReportCommand(hoCache));
+                context.AddCommand(new BitmapFormatsReportCommand(hoCache));
             }
 
             if(cache is GameCacheHaloOnline)
