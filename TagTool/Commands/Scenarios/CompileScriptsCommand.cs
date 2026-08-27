@@ -7,6 +7,8 @@ using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
 using TagTool.Scripting;
 using TagTool.Scripting.Compiler;
+using TagTool.Common.Logging;
+using System.Diagnostics;
 
 namespace TagTool.Commands.Scenarios
 {
@@ -42,7 +44,17 @@ namespace TagTool.Commands.Scenarios
 
             ScriptCompiler scriptCompiler = new ScriptCompiler(Cache, Definition);
 
-            scriptCompiler.CompileFile(srcTxt);
+            try
+            {
+                scriptCompiler.CompileFile(srcTxt);
+            }
+            catch (Exception ex) when (!Debugger.IsAttached)
+            {
+                Type exceptionType = ex.GetType();
+                Log.Error($"Hsc compilation failure: {ex.Message}" +
+                    $"\n[{exceptionType.Name}]{ex.StackTrace}");
+                return new TagToolError(CommandError.OperationFailed);
+            }
 
             Console.WriteLine("Done.");
 

@@ -1,6 +1,7 @@
 using TagTool.Cache;
 using TagTool.Common;
 using System.Collections.Generic;
+using TagTool.Tags.Definitions.Common;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
@@ -8,6 +9,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "material_effects", Tag = "foot", Size = 0xC)]
     public class MaterialEffects : TagStructure
 	{
+        [TagField(LabelSourceType = typeof(MaterialEffectEvent))]
         public List<Effect> Effects;
 
         [TagStructure(Size = 0x24)]
@@ -25,7 +27,7 @@ namespace TagTool.Tags.Definitions
                 public CachedTag Primary;
                 [TagField(ValidTags = new[] { "scmb", "snd!", "lsnd", "effe" })]
                 public CachedTag Secondary;
-                [TagField(Flags = GlobalMaterial)]
+                [TagField(Flags = GlobalMaterial | Label)]
                 public StringId MaterialName;
                 [TagField(Flags = GlobalMaterial)]
                 public short RuntimeMaterialIndex; // formerly GlobalMaterialIndex
@@ -52,7 +54,7 @@ namespace TagTool.Tags.Definitions
                 public CachedTag Effect;
                 [TagField(ValidTags = new[] { "snd!", "lsnd" })]
                 public CachedTag Sound;
-                [TagField(Flags = GlobalMaterial)]
+                [TagField(Flags = GlobalMaterial | Label)]
                 public StringId MaterialName;
                 [TagField(Flags = GlobalMaterial)]
                 public short RuntimeMaterialIndex;

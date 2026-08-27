@@ -41,7 +41,7 @@ namespace TagTool.Tags
         /// </summary>
         /// <param name="groups">The group to check.</param>
         /// <returns><c>true</c> if this group is a subgroup of the other group.</returns>
-        public bool BelongsTo(params TagGroup[] groups)
+        public bool BelongsTo(params IReadOnlyList<TagGroup> groups)
 		{
 			foreach (var group in groups)
 			{
@@ -56,7 +56,7 @@ namespace TagTool.Tags
         /// </summary>
         /// <param name="groupTags">The group tag to check, as a 4-character string.</param>
         /// <returns><c>true</c> if this group is a subgroup of the group tag.</returns>
-        public bool BelongsTo(params string[] groupTags)
+        public bool BelongsTo(params IReadOnlyList<string> groupTags)
         {
 			foreach (var groupTag in groupTags)
 			{
@@ -71,7 +71,7 @@ namespace TagTool.Tags
         /// </summary>
         /// <param name="groupTags">The group tag to check.</param>
         /// <returns><c>true</c> if this group is a subgroup of the group tag.</returns>
-        public bool BelongsTo(params Tag[] groupTags)
+        public bool BelongsTo(params IReadOnlyList<Tag> groupTags)
         {
             foreach (var groupTag in groupTags)
                 if (Tag.Equals(groupTag) || ParentTag.Equals(groupTag) || GrandParentTag.Equals(groupTag))

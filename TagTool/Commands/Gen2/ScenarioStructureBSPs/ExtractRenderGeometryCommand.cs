@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace TagTool.Commands.Gen2.ScenarioStructureBSPs
 {
-    class ExtractRenderGeometryCommand : Command
+    public class ExtractRenderGeometryCommand : Command
     {
         private GameCache CacheContext { get; }
         private ScenarioStructureBsp Definition { get; }

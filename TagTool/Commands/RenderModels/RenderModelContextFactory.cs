@@ -26,6 +26,7 @@ namespace TagTool.Commands.RenderModels
             context.AddCommand(new ExtractModelCommand(cache, tag, renderModel));
             context.AddCommand(new ExtractBitmapsCommand(cache, renderModel));
             context.AddCommand(new ExtractBMFCommand(cache, renderModel));
+            context.AddCommand(new ExportJMSCommand(cache, tag, renderModel));
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TagTool.Common;
 using TagTool.Tags;
 
@@ -45,7 +46,7 @@ namespace TagTool.Cache
                 return $"{Name}.{Group.ToString()}";
         }
 
-        public bool IsInGroup(params Tag[] groupTags)
+        public bool IsInGroup(params IReadOnlyList<Tag> groupTags)
         {
             return Group.BelongsTo(groupTags);
 		}

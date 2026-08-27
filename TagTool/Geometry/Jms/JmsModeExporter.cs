@@ -8,6 +8,8 @@ using TagTool.Common;
 using System.Numerics;
 using Assimp;
 using TagTool.Pathfinding;
+using Matrix4x4 = System.Numerics.Matrix4x4;
+using Quaternion = System.Numerics.Quaternion;
 
 namespace TagTool.Geometry.Jms
 {
@@ -24,6 +26,10 @@ namespace TagTool.Geometry.Jms
 
         public void Export(RenderModel mode)
         {
+            //build nodes
+            if (Jms.Nodes.Count == 0)
+                BuildNodesFromMode(mode);
+
             //build markers
             foreach (var markergroup in mode.MarkerGroups)
             {
@@ -120,11 +126,12 @@ namespace TagTool.Geometry.Jms
 
                         var indices = ModelExtractor.ReadIndices(meshReader, mesh.Parts[partIndex]);
 
-                        //recalculate vertex normals
-                        Vector3[] vertexPositions = vertices.Select(v => Vector3fromVector3D(v.Position)).ToArray();
-                        Vector3[] vertexNormals = CalculateVertexNormals(vertexPositions, indices);
-                        for (var v = 0; v < vertexNormals.Length; v++)
-                            vertices[v].Normal = Vector3DfromVector3(vertexNormals[v]);
+                        // disable recalculation for now, it functionally converts to face normals
+                        ////recalculate vertex normals
+                        //Vector3[] vertexPositions = vertices.Select(v => Vector3fromVector3D(v.Position)).ToArray();
+                        //Vector3[] vertexNormals = CalculateVertexNormals(vertexPositions, indices);
+                        //for (var v = 0; v < vertexNormals.Length; v++)
+                        //    vertices[v].Normal = Vector3DfromVector3(vertexNormals[v]);
 
                         for(var j = 0; j < indices.Length; j += 3)
                         {
@@ -207,6 +214,48 @@ namespace TagTool.Geometry.Jms
                     RadiantIntensity = new RealVector3d(skylight.RadiantIntensity.Red, skylight.RadiantIntensity.Green, skylight.RadiantIntensity.Blue),
                     SolidAngle = skylight.Magnitude
                 });
+        }
+
+        public void BuildNodesFromMode(RenderModel mode)
+        {
+            foreach (var node in mode.Nodes)
+            {
+                var newnode = new JmsFormat.JmsNode
+                {
+                    Name = Cache.StringTable.GetString(node.Name),
+                    ParentNodeIndex = node.ParentNode,
+                    Rotation = node.DefaultRotation,
+                    Position = new RealVector3d(node.DefaultTranslation.X, node.DefaultTranslation.Y, node.DefaultTranslation.Z) * 100.0f
+                };
+                if (!newnode.Name.StartsWith("b_"))
+                    newnode.Name = "b_" + newnode.Name;
+                if (newnode.ParentNodeIndex != -1)
+                {
+                    Matrix4x4 transform = MatrixFromNode(newnode.Rotation, newnode.Position);
+                    Matrix4x4 parent_transform = MatrixFromNode(Jms.Nodes[newnode.ParentNodeIndex].Rotation,
+                        Jms.Nodes[newnode.ParentNodeIndex].Position);
+                    Matrix4x4 result = Matrix4x4.Multiply(transform, parent_transform);
+
+                    Vector3 out_scale = new Vector3();
+                    Vector3 out_translate = new Vector3();
+                    Quaternion out_rotate = new Quaternion();
+                    Matrix4x4.Decompose(result, out out_scale, out out_rotate, out out_translate);
+                    newnode.Position = new RealVector3d(out_translate.X * out_scale.X, out_translate.Y * out_scale.Y, out_translate.Z * out_scale.Z);
+                    newnode.Rotation = new RealQuaternion(out_rotate.X, out_rotate.Y, out_rotate.Z, out_rotate.W);
+                }
+
+                Jms.Nodes.Add(newnode);
+            }
+        }
+
+        public Matrix4x4 MatrixFromNode(RealQuaternion rotation, RealVector3d position)
+        {
+            var quat = new Quaternion(rotation.I, rotation.J, rotation.K, rotation.W);
+
+            Matrix4x4 rot = Matrix4x4.CreateFromQuaternion(quat);
+            rot.Translation = new Vector3(position.I, position.J, position.K);
+
+            return rot;
         }
 
         private Vector3 PointToVector(RealPoint3d point)

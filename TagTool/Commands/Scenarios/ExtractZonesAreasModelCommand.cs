@@ -7,7 +7,7 @@ using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Scenarios
 {
-    class ExtractZonesAreasModelCommand : Command
+    public class ExtractZonesAreasModelCommand : Command
     {
         private GameCache Cache { get; }
         private Scenario Definition { get; }

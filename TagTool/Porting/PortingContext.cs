@@ -275,8 +275,8 @@ namespace TagTool.Porting
             }
 
             return FlagIsSet(PortingFlags.Replace)
-                    && !PortingConstants.DoNotReplaceGroups.Contains(existingTag.Group.Tag)
-                    && !DoNotReplaceGroups.Contains(existingTag.Group.Tag);
+                && !existingTag.IsInGroup(PortingConstants.DoNotReplaceGroups)
+                && !existingTag.IsInGroup(DoNotReplaceGroups);
         }
 
         private CachedTag FindExistingTag(Tag group, string name)

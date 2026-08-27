@@ -67,6 +67,7 @@ namespace TagTool.Commands.Porting
                     PortContext.DoNotReplaceGroups.Remove(tempGroup);
             }
 
+            Console.WriteLine("Current groups: " + string.Join(", ", PortContext.DoNotReplaceGroups));
             return true;
         }
     }

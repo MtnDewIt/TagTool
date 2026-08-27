@@ -160,21 +160,22 @@ namespace TagTool.Commands.Porting
                 return result;
             }
 
-            if (tagSpecifier.Length == 0 || (!char.IsLetter(tagSpecifier[0]) && !tagSpecifier.Contains('*')) || !tagSpecifier.Contains('.'))
+            int extIndex = tagSpecifier.LastIndexOf('.');
+            if (tagSpecifier.Length == 0 || extIndex == -1 || extIndex == tagSpecifier.Length - 1)
             {
                 Log.Error($"Invalid tag name: {tagSpecifier}");
                 return new List<CachedTag>();
             }
 
-            var tagIdentifiers = tagSpecifier.Split('.');
+            string tagGroup = tagSpecifier[(extIndex + 1)..];
 
-            if (!CacheContext.TagCache.TryParseGroupTag(tagIdentifiers[1], out var groupTag))
+            if (!CacheContext.TagCache.TryParseGroupTag(tagGroup, out var groupTag))
             {
                 Log.Error($"Invalid tag name: {tagSpecifier}");
                 return new List<CachedTag>();
             }
 
-            var tagName = tagIdentifiers[0];
+            string tagName = tagSpecifier[..extIndex];
 
             // find the CacheFile.IndexItem(s)
             if (tagName == "*") result = BlamCache.TagCache.TagTable.ToList().FindAll(

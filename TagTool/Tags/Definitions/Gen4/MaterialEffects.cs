@@ -1,8 +1,9 @@
-using TagTool.Cache;
-using TagTool.Common;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using TagTool.Cache;
+using TagTool.Common;
+using TagTool.Tags.Definitions.Common;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen4
@@ -10,6 +11,7 @@ namespace TagTool.Tags.Definitions.Gen4
     [TagStructure(Name = "material_effects", Tag = "foot", Size = 0xC)]
     public class MaterialEffects : TagStructure
     {
+        [TagField(LabelSourceType = typeof(MaterialEffectEvent))]
         public List<MaterialEffectBlockV2> Effects;
         
         [TagStructure(Size = 0x24)]
@@ -49,7 +51,9 @@ namespace TagTool.Tags.Definitions.Gen4
                 public CachedTag Tag;
                 [TagField(ValidTags = new [] { "sndo","lsnd","snd!","effe" })]
                 public CachedTag SecondaryTag;
+                [TagField(Flags = GlobalMaterial | Label)]
                 public StringId MaterialName;
+                [TagField(Flags = GlobalMaterial)]
                 public short RuntimeMaterialIndex;
                 public SweeneterModeEnum SweetenerMode;
                 [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]

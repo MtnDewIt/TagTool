@@ -143,6 +143,9 @@ namespace TagTool.Commands.Tags
 
                 foreach (var line in File.ReadAllLines(filename))
                 {
+                    if (string.IsNullOrWhiteSpace(filename))
+                        continue;
+
                     if (!Cache.TagCache.TryGetTag(line, out CachedTag tag))
                         return new TagToolError(CommandError.TagInvalid, line);
 

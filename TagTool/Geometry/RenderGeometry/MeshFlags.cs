@@ -19,7 +19,7 @@ namespace TagTool.Geometry
         UseVertexBuffersForIndices = 1 << 2,
         MeshHasPerInstanceLighting = 1 << 3,
         MeshIsUnindexed = 1 << 4,
-        MashShouldRenderInZPrepass = 1 << 5,
+        MeshShouldRenderInZPrepass = 1 << 5,
         MeshHasWater = 1 << 6,
         MeshHasDecal = 1 << 7
     }

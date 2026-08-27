@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using TagTool.Cache;
@@ -38,6 +39,9 @@ namespace TagTool.Tags
         {
             return GetInfo(enumType, version, platform).Members;
         }
+
+        public static List<string> GetMemberNames(Type enumType, CacheVersion version, CachePlatform platform)
+            => GetMemberEnumerable(enumType, version, platform).GetMemberNames();
 
         public static bool AttributeInCacheVersion(TagEnumMemberAttribute attr, CacheVersion compare)
         {
@@ -217,6 +221,8 @@ namespace TagTool.Tags
 
         IEnumerator<TagEnumMemberInfo> IEnumerable<TagEnumMemberInfo>.GetEnumerator() => GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public List<string> GetMemberNames() => [.. Members.Select(m => m.Name)];
     }
 
     public record TagEnumMemberInfo

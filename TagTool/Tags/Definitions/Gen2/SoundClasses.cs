@@ -11,6 +11,7 @@ namespace TagTool.Tags.Definitions.Gen2
     [TagStructure(Name = "sound_classes", Tag = "sncl", Size = 0x8)]
     public class SoundClasses : TagStructure
     {
+        [TagField(LabelSourceType = typeof(SoundClass))]
         public List<SoundClassBlock> Classes;
         
         [TagStructure(Size = 0x5C, Platform = CachePlatform.Original)]

@@ -3,7 +3,6 @@ namespace TagTool.Ai
     public enum VocalizationPriority : short
     {
         None,
-        Automatic,
         Recall,
         Idle,
         Comment,

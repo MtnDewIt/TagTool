@@ -9,7 +9,7 @@ using TagTool.Tags.Definitions.Gen2;
 
 namespace TagTool.Commands.Gen2.ScenarioStructureBSPs
 {
-    class ExtractCollisionGeometryCommand : Command
+    public class ExtractCollisionGeometryCommand : Command
     {
         private GameCache CacheContext { get; }
         private ScenarioStructureBsp Definition { get; }

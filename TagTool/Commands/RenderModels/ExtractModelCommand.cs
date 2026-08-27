@@ -9,7 +9,7 @@ using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.RenderModels
 {
-    class ExtractModelCommand : Command
+    public class ExtractModelCommand : Command
     {
         private GameCache Cache { get; }
         private CachedTag Tag { get; }

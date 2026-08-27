@@ -319,6 +319,18 @@ namespace TagTool.Porting.Gen3
             {
                 // Used for facial animations
                 extraInfo.EncodedPermutationSections = BlamSoundGestalt.ExtraInfo[sound.SoundReference.ExtraInfoIndex].EncodedPermutationSections;
+                
+                // Remove additional facial animation permutations for now
+                if (extraInfo.EncodedPermutationSections.Count > 0 && BlamCache.Platform == CachePlatform.MCC)
+                {
+                    var dialogueInfoNew = extraInfo.EncodedPermutationSections[0].SoundDialogueInfoNew?[0];
+                    if (dialogueInfoNew is not null)
+                    {
+                        int index = dialogueInfoNew.LanguageIndices.EnglishIndex;
+                        if (dialogueInfoNew.FacialAnimation.Count > index)
+                            dialogueInfoNew.FacialAnimation = [dialogueInfoNew.FacialAnimation[index]];
+                    }
+                }
             }
             else
             {

@@ -218,11 +218,9 @@ namespace TagTool.Tags.Definitions
         public float OpeningTime; // s
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float ClosingTime; // s
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float EmpDisabledTime; // seconds
-        [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
-        public float EmpRadius;
 
+        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        public float EmpDisabledTime; // s
         [TagField(ValidTags = new[] { "effe" }, MinVersion = CacheVersion.Halo3Retail)]
         public CachedTag EmpEffect;
 

@@ -80,7 +80,8 @@ namespace TagTool.Commands.Strings
             if (args.Count != 2)
                 return new TagToolError(CommandError.ArgCount);
 
-            if (!uint.TryParse(args[1], NumberStyles.HexNumber, null, out uint stringId))
+            string hexNumber = args[1].ToLower().Replace("0x","");
+            if (!uint.TryParse(hexNumber, NumberStyles.HexNumber, null, out uint stringId))
                 return new TagToolError(CommandError.ArgInvalid, $"\"{args[1]}\"");
 
             var str = Cache.StringTable.GetString(new StringId(stringId));

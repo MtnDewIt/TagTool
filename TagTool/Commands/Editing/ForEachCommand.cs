@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TagTool.Common;
+using System.Reflection;
 using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
 using static TagTool.Tags.TagFieldFlags;
@@ -167,6 +168,9 @@ namespace TagTool.Commands.Editing
 
             if (structureAttribute == null)
             {
+                TagFieldAttribute fieldAttr = field.GetCustomAttributes<TagFieldAttribute>()?.FirstOrDefault();
+                List<string> labels = GetConstantLabels(fieldAttr);
+
                 for (var i = (from ?? 0); i < (to.HasValue ? to.Value + 1 : fieldValue.Count); i++)
                 {
                     ContextReturn(previousContext, previousOwner, previousStructure);
@@ -176,7 +180,7 @@ namespace TagTool.Commands.Editing
                             .Equals(false))
                         return new TagToolError(CommandError.ArgInvalid, $"Invalid tag block name: {blockName}");
 
-                    var label = GetLabel(fieldValue, i);
+                    var label = i < labels.Count ? labels[i] : GetLabel(fieldValue, i);
 
                     Console.Write(label == null ? $"[{i}] " : $"[{label} ({i})] ");
                     foreach (var command in commandsToExecute)
@@ -216,6 +220,18 @@ namespace TagTool.Commands.Editing
             ContextReturn(previousContext, previousOwner, previousStructure);
 
             return true;
+        }
+
+        private List<string> GetConstantLabels(TagFieldAttribute fieldAttr)
+        {
+            if (fieldAttr?.LabelSourceType is not null)
+            {
+                if (fieldAttr.LabelSourceType.IsEnum)
+                {
+                    return TagEnum.GetMemberNames(fieldAttr.LabelSourceType, Cache.Version, Cache.Platform);
+                }
+            }
+            return [];
         }
 
         private string GetLabel(IList elements, int index)

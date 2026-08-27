@@ -7,7 +7,7 @@ using TagTool.IO;
 
 namespace TagTool.Commands.Files
 {
-    class ImportFontsCommand : Command
+    public class ImportFontsCommand : Command
     {
         public GameCacheHaloOnlineBase Cache { get; }
 

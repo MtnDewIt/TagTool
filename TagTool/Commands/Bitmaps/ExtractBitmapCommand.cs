@@ -12,7 +12,7 @@ using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Bitmaps
 {
-    class ExtractBitmapCommand : Command
+    public class ExtractBitmapCommand : Command
     {
         private GameCache Cache { get; }
         private CachedTag Tag { get; }

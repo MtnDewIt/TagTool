@@ -24,7 +24,7 @@ namespace TagTool.Geometry
         /// <summary>
         /// The render method tag to use to render the material.
         /// </summary>
-        [TagField(Flags = Label)]
+        [TagField(Flags = Label, ValidTags = ["rm  "])]
         public CachedTag RenderMethod;
 
         [TagField(MinVersion = CacheVersion.HaloOnline700123, MaxVersion = CacheVersion.HaloOnline700123)]

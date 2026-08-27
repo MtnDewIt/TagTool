@@ -9,7 +9,7 @@ using TagTool.IO;
 
 namespace TagTool.Commands.RenderModels
 {
-    class ExtractBitmapsCommand : Command
+    public class ExtractBitmapsCommand : Command
     {
         private GameCache Cache { get; }
         private RenderModel Definition { get; }

@@ -1,8 +1,9 @@
-using TagTool.Cache;
-using TagTool.Common;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using TagTool.Cache;
+using TagTool.Common;
+using TagTool.Tags.Definitions.Common;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen2
@@ -10,6 +11,7 @@ namespace TagTool.Tags.Definitions.Gen2
     [TagStructure(Name = "material_effects", Tag = "foot", Size = 0x8)]
     public class MaterialEffects : TagStructure
     {
+        [TagField(LabelSourceType = typeof(MaterialEffectEvent))]
         public List<MaterialEffectBlockV2> Effects;
         
         [TagStructure(Size = 0x18)]
@@ -48,9 +50,10 @@ namespace TagTool.Tags.Definitions.Gen2
                 public CachedTag TagEffectOrSound;
                 [TagField(ValidTags = new [] { "snd!","lsnd","effe" })]
                 public CachedTag SecondaryTagEffectOrSound;
+                [TagField(Flags = GlobalMaterial | Label)]
                 public StringId MaterialName;
-                [TagField(Length = 0x2)]
-                public byte[] Unknown;
+                [TagField(Flags = GlobalMaterial)]
+                public short RuntimeMaterialIndex;
                 public SweetenerModeValue SweetenerMode;
                 [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
                 public byte[] Padding;
@@ -70,9 +73,10 @@ namespace TagTool.Tags.Definitions.Gen2
                 public CachedTag TagEffectOrSound;
                 [TagField(ValidTags = new [] { "snd!","lsnd","effe" })]
                 public CachedTag SecondaryTagEffectOrSound;
+                [TagField(Flags = GlobalMaterial | Label)]
                 public StringId MaterialName;
-                [TagField(Length = 0x2)]
-                public byte[] Unknown;
+                [TagField(Flags = GlobalMaterial)]
+                public short RuntimeMaterialIndex;
                 public SweetenerModeValue SweetenerMode;
                 [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
                 public byte[] Padding;

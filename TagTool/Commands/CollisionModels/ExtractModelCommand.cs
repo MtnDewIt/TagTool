@@ -8,7 +8,7 @@ using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.CollisionModels
 {
-    class ExtractModelCommand : Command
+    public class ExtractModelCommand : Command
     {
         private GameCache Cache { get; }
         private CollisionModel Definition { get; }

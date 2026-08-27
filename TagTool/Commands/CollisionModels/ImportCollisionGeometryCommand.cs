@@ -19,7 +19,7 @@ using TagTool.Common.Logging;
 
 namespace TagTool.Commands.CollisionModels
 {
-    class ImportCollisionGeometryCommand : Command
+    public class ImportCollisionGeometryCommand : Command
     {
         private GameCacheHaloOnlineBase Cache { get; }
         private CollisionGeometry Bsp { get; set; }

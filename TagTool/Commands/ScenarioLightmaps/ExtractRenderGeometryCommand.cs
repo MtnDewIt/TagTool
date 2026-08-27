@@ -8,7 +8,7 @@ using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.ScenarioLightmaps
 {
-    class ExtractRenderGeometryCommand : Command
+    public class ExtractRenderGeometryCommand : Command
     {
         private GameCache Cache { get; }
         private ScenarioLightmapBspData Definition { get; }

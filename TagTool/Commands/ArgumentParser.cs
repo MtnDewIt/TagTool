@@ -73,27 +73,10 @@ namespace TagTool.Commands
         public static bool TryParseEnum<TEnum>(string name, out TEnum result)
             where TEnum : struct
         {
-            if (Enum.TryParse(name, out result))
+            if (Enum.TryParse(name, true, out result) && Enum.IsDefined(typeof(TEnum), result))
                 return true;
 
-            var names = Enum.GetNames(typeof(TEnum)).ToList();
-
-            var nameLow = name.ToLower();
-            var namesLow = names.Select(i => i.ToLower()).ToList();
-
-            var found = namesLow.Find(n => n == nameLow);
-
-            if (found != null)
-                return Enum.TryParse(names[namesLow.IndexOf(nameLow)], out result);
-
-            var nameSnake = name.ToSnakeCase();
-            var namesSnake = names.Select(i => i.ToSnakeCase()).ToList();
-
-            found = namesSnake.Find(n => n == nameSnake);
-
-            if (found != null)
-                return Enum.TryParse(names[namesSnake.IndexOf(nameSnake)], out result);
-
+            result = default;
             return false;
         }
     }

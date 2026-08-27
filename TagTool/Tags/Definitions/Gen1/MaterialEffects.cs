@@ -1,8 +1,9 @@
-using TagTool.Cache;
-using TagTool.Common;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using TagTool.Cache;
+using TagTool.Common;
+using TagTool.Tags.Definitions.Common;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen1
@@ -10,6 +11,7 @@ namespace TagTool.Tags.Definitions.Gen1
     [TagStructure(Name = "material_effects", Tag = "foot", Size = 0x8C)]
     public class MaterialEffects : TagStructure
     {
+        [TagField(LabelSourceType = typeof(MaterialEffectEvent))]
         public List<MaterialEffectBlock> Effects;
         [TagField(Length = 0x80)]
         public byte[] Padding;

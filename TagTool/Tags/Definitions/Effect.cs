@@ -4,8 +4,6 @@ using System;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
 using TagTool.Damage;
-using static TagTool.Tags.Definitions.Gen4.BreakableSurface.ParticleSystemDefinitionBlockNew.ParticleSystemEmitterDefinitionBlock.GpuPropertyFunctionColorStruct;
-using System.Linq;
 using TagTool.Commands.Common;
 using static TagTool.Effects.EditableProperty;
 using System.IO;
@@ -351,6 +349,10 @@ namespace TagTool.Tags.Definitions
                     [TagField(Format = "Degrees")]
                     public ParticlePropertyScalar EmissionAngle;
 
+                    /// <summary>
+                    /// Determines the max tilt for the particle axis.
+                    /// </summary>
+                    [TagField(Format = "Degrees")]
                     public ParticlePropertyScalar EmissionAxisAngle;
 
                     /// <summary>

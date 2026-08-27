@@ -39,6 +39,9 @@ namespace TagTool.Commands.Tags
                 return new TagToolError(CommandError.ArgCount);
 
             var phrase = args[0].ToLower().Trim();
+            if (Cache.TagCache.TryGetCachedTag(args[0], out CachedTag phraseTag))
+                phrase = phraseTag.ToString();
+
             var tagSet = Cache.TagCache.NonNull();
 
             if (args.Count == 2)
@@ -141,7 +144,7 @@ namespace TagTool.Commands.Tags
                         break;
                     default:
                         {
-                            var stringValue = data.ToString();
+                            var stringValue = data.ToString() ?? string.Empty;
                             if (stringValue.ToLower().Contains(phrase))
                                 Console.WriteLine($"{outputPrefix}{path} = {stringValue}");
                         }

@@ -109,6 +109,11 @@ namespace TagTool.Tags
         /// The underlying type of the Enum.
         /// </summary>
         public Type EnumType { get; set; } = null;
+
+        /// <summary>
+        /// Provides constant labels corresponding to block indices.
+        /// </summary>
+        public Type LabelSourceType { get; set; } = null;
     }
 
     [Flags]

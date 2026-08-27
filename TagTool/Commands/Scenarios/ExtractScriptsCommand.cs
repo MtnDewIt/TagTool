@@ -12,7 +12,7 @@ using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Scenarios
 {
-    class ExtractScriptsCommand : Command
+    public class ExtractScriptsCommand : Command
     {
         private GameCache Cache { get; }
         private CachedTag Tag { get; }
@@ -24,9 +24,11 @@ namespace TagTool.Commands.Scenarios
                   "ExtractScripts",
                   "Extracts all scripts in the current scenario tag to a file.",
 
-                  "ExtractScripts [Output Filename]",
+                  "ExtractScripts [no-cleanup] [spaces] [path]",
 
-                  "Extracts all scripts in the current scenario tag to a file.")
+                  "Extracts all scripts in the current scenario tag to a file." +
+                  "\n- no-cleanup: Do not clean up control flow for source accuracy" +
+                  "\n- spaces: indent with spaces rather than tabs")
         {
             Cache = cache;
             Tag = tag;
@@ -35,32 +37,55 @@ namespace TagTool.Commands.Scenarios
 
         public override object Execute(List<string> args)
         {
-            FileInfo scriptFile;
-            string mapName = Tag.Name.Split('\\').Last();
-            string fileName = $"_{Definition.MapId}_{mapName}.hsc";
+            if (args.Count > 2)
+                return new TagToolError(CommandError.ArgCount);
 
-            switch (args.Count)
+            FileInfo scriptFile;
+            string path = "haloscript";
+            string extension = ".hsc";
+            bool cleanup = true;
+            bool spaces = false;
+
+            foreach (var arg in args)
             {
-                case 0:
-                    {
-                        if (CacheVersionDetection.IsEldewrito(Cache.Version))
-                            scriptFile = new FileInfo($"haloscript\\ED" + fileName);
-                        else
-                            scriptFile = new FileInfo($"haloscript\\{Cache.Version}" + fileName);
-                    }
-                    break;
-                case 1:
-                    scriptFile = new FileInfo(args[0]);
-                    break;
-                default:
-                    return new TagToolError(CommandError.ArgCount);
+                switch (arg.ToLower())
+                {
+                    case "no-cleanup":
+                        cleanup = false;
+                        break;
+                    case "spaces":
+                        spaces = true;
+                        break;
+                    default:
+                        path = arg;
+                        break;
+                }
             }
 
-            System.IO.Directory.CreateDirectory("haloscript");
+            if (Path.GetExtension(path) != extension)
+            {
+                var split = path.Split('.');
+                string newPath = split[0];
+
+                if (split.Length > 1)
+                    path = $"{newPath}{extension}";
+                else
+                {
+                    string scenario = Path.GetFileNameWithoutExtension(Tag.ToString());
+                    string platform = Cache.Platform == CachePlatform.Original ? string.Empty : $"{Cache.Platform}";
+                    string fileName = $"{Cache.Version}{platform}_{Definition.MapId}_{scenario}{extension}";
+
+                    path = Path.Combine(newPath, fileName);
+                }
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
+            scriptFile = new FileInfo(path);
+
             using (var scriptFileStream = scriptFile.Create())
             using (var scriptWriter = new StreamWriter(scriptFileStream))
             {
-                var decompiler = new ScriptDecompiler(Cache, Definition);
+                var decompiler = new ScriptDecompiler(Cache, Definition, Tag, cleanup, spaces);
                 decompiler.DecompileScripts(scriptWriter);
             }
 

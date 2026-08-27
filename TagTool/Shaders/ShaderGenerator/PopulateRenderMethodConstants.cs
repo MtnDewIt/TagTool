@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using TagTool.Cache;
 using TagTool.Commands.Common;
-using TagTool.Tags.Definitions;
-using TagTool.Shaders.ShaderMatching;
-using static TagTool.Tags.Definitions.RenderMethod.RenderMethodPostprocessBlock;
 using TagTool.Common.Logging;
+using TagTool.Shaders.ShaderMatching;
+using TagTool.Tags.Definitions;
+using static TagTool.Tags.Definitions.RenderMethod.RenderMethodPostprocessBlock;
+using static TagTool.Tags.Definitions.RenderMethodOption.ParameterBlock;
 
 namespace TagTool.Shaders.ShaderGenerator
 {
@@ -82,35 +83,43 @@ namespace TagTool.Shaders.ShaderGenerator
 
                     foreach (var option in rmop.Parameters)
                     {
-                        if (Cache.StringTable.GetString(option.Name) == name &&
-                            option.Type != RenderMethodOption.ParameterBlock.OptionDataType.Bool &&
-                            option.Type != RenderMethodOption.ParameterBlock.OptionDataType.Int)
-                        {
-                            if (option.Type == RenderMethodOption.ParameterBlock.OptionDataType.Bitmap)
-                            {
-                                realConstant.Arg0 = option.DefaultBitmapScale > 0 ? option.DefaultBitmapScale : 1.0f;
-                                realConstant.Arg1 = option.DefaultBitmapScale > 0 ? option.DefaultBitmapScale : 1.0f;
-                                realConstant.Arg2 = 0;
-                                realConstant.Arg3 = 0;
-                            }
-                            else if (option.Type == RenderMethodOption.ParameterBlock.OptionDataType.ArgbColor)
-                            {
-                                realConstant.Arg0 = (float)option.DefaultColor.Red / 255;
-                                realConstant.Arg1 = (float)option.DefaultColor.Green / 255;
-                                realConstant.Arg2 = (float)option.DefaultColor.Blue / 255;
-                                realConstant.Arg3 = (float)option.DefaultColor.Alpha / 255;
-                            }
-                            else
-                            {
-                                realConstant.Arg0 = option.DefaultFloatArgument;
-                                realConstant.Arg1 = option.DefaultFloatArgument;
-                                realConstant.Arg2 = option.DefaultFloatArgument;
-                                realConstant.Arg3 = option.DefaultFloatArgument;
-                            }
+                        if (!string.Equals(Cache.StringTable.GetString(option.Name), name))
+                            continue;
 
-                            found = true;
-                            break;
+                        switch (option.Type)
+                        {
+                            case OptionDataType.Bool:
+                            case OptionDataType.Int:
+                                continue;
+                            case OptionDataType.Bitmap:
+                                {
+                                    realConstant.Arg0 = option.DefaultBitmapScale > 0 ? option.DefaultBitmapScale : 1.0f;
+                                    realConstant.Arg1 = option.DefaultBitmapScale > 0 ? option.DefaultBitmapScale : 1.0f;
+                                    realConstant.Arg2 = 0;
+                                    realConstant.Arg3 = 0;
+                                    break;
+                                }
+                            case OptionDataType.Color:
+                            case OptionDataType.ArgbColor:
+                                {
+                                    realConstant.Arg0 = (float)option.DefaultColor.Red / 255;
+                                    realConstant.Arg1 = (float)option.DefaultColor.Green / 255;
+                                    realConstant.Arg2 = (float)option.DefaultColor.Blue / 255;
+                                    realConstant.Arg3 = option.Type == OptionDataType.ArgbColor ? (float)option.DefaultColor.Alpha / 255 : 1.0f;
+                                    break;
+                                }
+                            default:
+                                {
+                                    realConstant.Arg0 = option.DefaultFloatArgument;
+                                    realConstant.Arg1 = option.DefaultFloatArgument;
+                                    realConstant.Arg2 = option.DefaultFloatArgument;
+                                    realConstant.Arg3 = option.DefaultFloatArgument;
+                                    break;
+                                }
                         }
+
+                        found = true;
+                        break;
                     }
 
                     if (found)
@@ -139,7 +148,7 @@ namespace TagTool.Shaders.ShaderGenerator
 
                     foreach (var option in rmop.Parameters)
                     {
-                        if (Cache.StringTable.GetString(option.Name) == name && option.Type != RenderMethodOption.ParameterBlock.OptionDataType.Int)
+                        if (Cache.StringTable.GetString(option.Name) == name && option.Type != OptionDataType.Int)
                         {
                             integerConstant = option.DefaultIntBoolArgument;
                             found = true;
@@ -171,7 +180,7 @@ namespace TagTool.Shaders.ShaderGenerator
 
                     foreach (var option in rmop.Parameters)
                     {
-                        if (Cache.StringTable.GetString(option.Name) == name && option.Type != RenderMethodOption.ParameterBlock.OptionDataType.Bool)
+                        if (Cache.StringTable.GetString(option.Name) == name && option.Type != OptionDataType.Bool)
                         {
                             booleanConstants |= option.DefaultIntBoolArgument >> i;
                             found = true;

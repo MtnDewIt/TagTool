@@ -12,7 +12,7 @@ using TagTool.Cache.Gen3;
 
 namespace TagTool.Commands.Tags
 {
-    class ExportTagModCommand : Command
+    public class ExportTagModCommand : Command
     {
         public GameCacheHaloOnlineBase Cache { get; }
 

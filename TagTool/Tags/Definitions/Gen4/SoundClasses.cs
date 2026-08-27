@@ -1,8 +1,9 @@
-using TagTool.Cache;
-using TagTool.Common;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using TagTool.Audio;
+using TagTool.Cache;
+using TagTool.Common;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions.Gen4
@@ -10,6 +11,7 @@ namespace TagTool.Tags.Definitions.Gen4
     [TagStructure(Name = "sound_classes", Tag = "sncl", Size = 0xC)]
     public class SoundClassesDefinition : TagStructure
     {
+        [TagField(LabelSourceType = typeof(SoundClass))]
         public List<SoundClassBlockStruct> SoundClasses;
         
         [TagStructure(Size = 0xD4)]

@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace TagTool.Commands.Tags
 {
-    class ExtractTagCommand : Command
+    public class ExtractTagCommand : Command
     {
         private GameCache Cache { get; }
 
